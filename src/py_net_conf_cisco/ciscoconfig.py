@@ -1,12 +1,15 @@
 from copy import copy
-from ipaddress import IPv4Interface
+from ipaddress import IPv4Address, IPv4Interface, IPv6Address
 from pathlib import Path
 from typing import Optional, Union
 
 from ciscoconfparse2 import CiscoConfParse
+
+# from ciscoconfparse2.ccp_util import IPv4Address
 from ciscoconfparse2.models_cisco import BaseCfgLine
 
 from .interface_datamodel import InterfaceConfig
+from .radius_server_datamodel import RadiusServerConfig
 
 
 class CiscoConfig:
@@ -269,3 +272,77 @@ class CiscoConfig:
 
         self._parsed_config.commit()
         return True
+
+    def _find_radius_server_lines(self) -> list[BaseCfgLine]:
+        return self._parsed_config.find_objects(r"^radius server ")
+
+    @property
+    def last_config_line(self) -> BaseCfgLine:
+        end_lines = self._parsed_config.find_objects(r"^end$")
+        if len(end_lines) > 0:
+            return end_lines[-1]
+        else:
+            return self._parsed_config.objs[-1]
+
+    @property
+    def radius_servers(self) -> list[RadiusServerConfig]:
+        found = []
+        server_lines = self._find_radius_server_lines()
+        for line in server_lines:
+            address_line = line.re_search_children(r"^ address ipv[4|6]")[0]
+            key_line = line.re_search_children(r"^ key")[0]
+            name = line.re_match(r"^radius server (\S+)")
+            if "ipv4" in address_line:
+                ip_address = IPv4Address(
+                    address_line.re_match(r"address ipv4 (\S+)")
+                )
+            else:
+                ip_address = IPv6Address(
+                    address_line.re_match(r"address ipv4 (\S+)")
+                )
+            auth_port = address_line.re_match(
+                r"auth-port (\S+)", default="1812"
+            )
+            acct_port = address_line.re_match(
+                r"acct-port (\S+)", default="1813"
+            )
+            key = key_line.re_match(r"^ key \d (\S+)")
+            found.append(
+                RadiusServerConfig(
+                    ip_address=ip_address,
+                    name=name,
+                    key=key,
+                    auth_port=int(auth_port),
+                    acct_port=int(acct_port),
+                )
+            )
+
+        return found
+
+    @radius_servers.setter
+    def radius_servers(self, new_servers: list[RadiusServerConfig]) -> None:
+        current_servers = self._find_radius_server_lines()
+        current_server_count = len(current_servers)
+        new_server_count = len(new_servers)
+        if current_server_count == 0 and new_server_count == 0:
+            return
+
+        if current_server_count == 0:
+            add_before_line = self.last_config_line
+        else:
+            last_current_radius_line = current_servers[-1].children[-1]
+            index = self._parsed_config.objs.index(last_current_radius_line)
+            add_before_line = self._parsed_config.objs[index + 1]
+
+        for new_server in new_servers[::-1]:
+            for line in new_server.to_config_lines()[::-1]:
+                self._parsed_config.objs.insert(add_before_line.index, line)
+                self._parsed_config.commit()
+
+        if current_server_count > 0:
+            for current_server in current_servers[::-1]:
+                current_server_line = self._parsed_config.find_objects(
+                    current_server.text
+                )
+                current_server_line[0].delete()
+                self._parsed_config.commit()
