@@ -71,8 +71,13 @@ ip access-list extended WEB_ACL
  permit tcp any any eq 443
  deny ip any any
 !
-radius-server host 192.168.1.100 auth-port 1812 acct-port 1813 key secret123
-radius-server host 192.168.1.101 key radius_key
+radius server radius00
+ address ipv4 192.168.1.100 auth-port 1812 acct-port 1813
+ key 7 encrypted_string
+!
+radius server radius01
+ address ipv4 192.168.1.101 auth-port 1812 acct-port 1813
+ key 7 encrypted_string
 !
 tacacs-server host 192.168.1.200 port 49 key tacacs_secret
 tacacs-server host 192.168.1.201
