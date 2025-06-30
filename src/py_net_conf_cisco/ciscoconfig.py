@@ -1,12 +1,15 @@
 from copy import copy
-from ipaddress import IPv4Interface
+from ipaddress import IPv4Address, IPv4Interface, IPv6Address
 from pathlib import Path
 from typing import Optional, Union
 
 from ciscoconfparse2 import CiscoConfParse
+
+# from ciscoconfparse2.ccp_util import IPv4Address
 from ciscoconfparse2.models_cisco import BaseCfgLine
 
 from .interface_datamodel import InterfaceConfig
+from .radius_server_datamodel import RadiusServerConfig
 
 
 class CiscoConfig:
@@ -269,3 +272,34 @@ class CiscoConfig:
 
         self._parsed_config.commit()
         return True
+
+    @property
+    def radius_servers(self) -> list[RadiusServerConfig]:
+        found = []
+        server_lines = self._parsed_config.find_objects(r"^radius server ")
+        for line in server_lines:
+            address_line = line.re_search_children(r"^ address ipv[4|6]")[0]
+            key_line = line.re_search_children(r"^ key")[0]
+            name = line.re_match(r"^radius server (\S+)")
+            if "ipv4" in address_line:
+                ip_address = IPv4Address(
+                    address_line.re_match(r"address ipv4 (\S+)")
+                )
+            else:
+                ip_address = IPv6Address(
+                    address_line.re_match(r"address ipv4 (\S+)")
+                )
+            auth_port = address_line.re_match(r"auth-port (\S+)", default=None)
+            acct_port = address_line.re_match(r"acct-port (\S+)", default=None)
+            key = key_line.re_match(r"^ key \d (\S+)")
+            found.append(
+                RadiusServerConfig(
+                    ip_address=ip_address,
+                    name=name,
+                    key=key,
+                    auth_port=int(auth_port),
+                    acct_port=int(acct_port),
+                )
+            )
+
+        return found

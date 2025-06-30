@@ -1,12 +1,13 @@
 import os
 import tempfile
-from ipaddress import IPv4Interface
+from ipaddress import IPv4Address, IPv4Interface
 
 import pytest
 import sample1
 
 from py_net_conf_cisco import CiscoConfig, InterfaceConfig
 from py_net_conf_cisco.interface_datamodel import InterfaceType
+from py_net_conf_cisco.radius_server_datamodel import RadiusServerConfig
 
 
 class TestCiscoConfig:
@@ -488,3 +489,24 @@ class TestCiscoConfig:
         config_from_file._parsed_config.commit()
         with pytest.raises(ValueError, match=exception_string):
             config_from_file.set_interface(interface)
+
+    def test_radius_servers_property_empty_config(
+        self, empty_config: CiscoConfig
+    ):
+        assert empty_config.radius_servers == []
+
+    def test_radius_servers_property_config_from_file(
+        self, config_from_file: CiscoConfig
+    ):
+        assert config_from_file.radius_servers == [
+            RadiusServerConfig(
+                ip_address=IPv4Address("192.168.1.100"),
+                name="radius00",
+                key="encrypted_string",
+            ),
+            RadiusServerConfig(
+                ip_address=IPv4Address("192.168.1.101"),
+                name="radius01",
+                key="encrypted_string",
+            ),
+        ]
