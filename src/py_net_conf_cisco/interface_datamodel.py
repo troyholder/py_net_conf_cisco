@@ -4,10 +4,13 @@ Data models for Cisco interface configuration options.
 This module provides dataclasses and enums for structuring interface configuration options.
 """
 
+import string
 from dataclasses import dataclass, field
 from enum import Enum
 from ipaddress import IPv4Interface
 from typing import Optional
+
+interface_number_chars = set(string.digits + "/")
 
 
 class InterfaceType(Enum):
@@ -28,14 +31,49 @@ class InterfaceType(Enum):
 
 
 @dataclass
-class InterfaceConfig:
+class Interface:
     """
-    Represents an interface configuration.
+    Represents an interface
 
     Attributes:
             interface_type: The type of interface (e.g., GigabitEthernet).
             interface_number: The number of the interface as a string (e.g., 1/1/1).
             subinterface_number: Optional subinterface number.
+    """
+
+    interface_type: InterfaceType
+    interface_number: str
+    subinterface_number: Optional[int] = None
+
+    def __post_init__(self):
+        if type(self.interface_type) is not InterfaceType:
+            raise TypeError("interface_type is not a InterfaceType")
+        if type(self.interface_number) is not str:
+            raise TypeError("interface_number is not a string")
+        if (
+            self.subinterface_number is not None
+            and type(self.subinterface_number) is not int
+        ):
+            raise TypeError("subinterface_number is not an integer")
+        if (
+            self.subinterface_number is not None
+            and self.subinterface_number < 0
+        ):
+            raise ValueError("subinterface_number must be a positive integer")
+        unexpected_chars = set(self.interface_number) - interface_number_chars
+        if unexpected_chars:
+            raise ValueError(
+                f"interface_number contains unexpected characters: {', '.join(unexpected_chars)}"
+            )
+
+
+@dataclass
+class InterfaceConfig:
+    """
+    Represents an interface configuration.
+
+    Attributes:
+            interface: Interface object
             ip_address: Optional IPv4 interface address (ipaddress.IPv4Interface).
             vrf: Optional VRF assignment as a string.
             dhcp_assigned: If True, IP address is assigned by DHCP.
@@ -44,9 +82,7 @@ class InterfaceConfig:
             secondary_ip_addresses: Optional list of secondary  IPv4 interface address (ipaddress.IPv4Interface).
     """
 
-    interface_type: InterfaceType
-    interface_number: str
-    subinterface_number: Optional[int] = None
+    interface: Interface
     ip_address: Optional[IPv4Interface] = None
     vrf: Optional[str] = None
     dhcp_assigned: Optional[bool] = None
@@ -68,7 +104,7 @@ class InterfaceConfig:
 
     def interface_line(self):
         """Return the the parent line for the interface configuration"""
-        return f"interface {self.interface_type.value}{self.interface_number}{'' if self.subinterface_number is None else '.' + str(self.subinterface_number)}"
+        return f"interface {self.interface.interface_type.value}{self.interface.interface_number}{'' if self.interface.subinterface_number is None else '.' + str(self.interface.subinterface_number)}"
 
     def to_config_lines(self):
         """
@@ -93,7 +129,7 @@ class InterfaceConfig:
         return lines
 
     def interface_string(self) -> str:
-        return f"interface {self.interface_type.value}{self.interface_number}"
+        return f"interface {self.interface.interface_type.value}{self.interface.interface_number}"
 
     def description_string(self) -> str:
         return f"description {self.description}" if self.description else ""

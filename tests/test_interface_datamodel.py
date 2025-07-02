@@ -3,11 +3,103 @@ Test suite for the interface datamodels.
 """
 
 import ipaddress
+import re
 from ipaddress import IPv4Interface
 
 import pytest
 
-from py_net_conf_cisco.interface_datamodel import InterfaceConfig, InterfaceType
+from py_net_conf_cisco.interface_datamodel import (
+    Interface,
+    InterfaceConfig,
+    InterfaceType,
+)
+
+
+class TestInterface:
+    failing_cases = [
+        (
+            {},
+            TypeError,
+            re.escape(
+                "Interface.__init__() missing 2 required positional arguments: 'interface_type' and 'interface_number'"
+            ),
+        ),
+        (
+            {
+                "interface_type": "foo",
+            },
+            TypeError,
+            re.escape(
+                "Interface.__init__() missing 1 required positional argument: 'interface_number'"
+            ),
+        ),
+        (
+            {
+                "interface_number": "foo",
+            },
+            TypeError,
+            re.escape(
+                "Interface.__init__() missing 1 required positional argument: 'interface_type'"
+            ),
+        ),
+        (
+            {
+                "interface_type": "foo",
+                "interface_number": "bar",
+            },
+            TypeError,
+            re.escape("interface_type is not a InterfaceType"),
+        ),
+        (
+            {
+                "interface_type": InterfaceType.GIGABITETHERNET,
+                "interface_number": 9,
+            },
+            TypeError,
+            re.escape("interface_number is not a string"),
+        ),
+        (
+            {
+                "interface_type": InterfaceType.GIGABITETHERNET,
+                "interface_number": "1/1",
+                "subinterface_number": "0",
+            },
+            TypeError,
+            re.escape("subinterface_number is not an integer"),
+        ),
+        (
+            {
+                "interface_type": InterfaceType.GIGABITETHERNET,
+                "interface_number": "1/1",
+                "subinterface_number": -1,
+            },
+            ValueError,
+            re.escape("subinterface_number must be a positive integer"),
+        ),
+        (
+            {
+                "interface_type": InterfaceType.GIGABITETHERNET,
+                "interface_number": "1/A",
+            },
+            ValueError,
+            re.escape("interface_number contains unexpected characters: A"),
+        ),
+        (
+            {
+                "interface_type": InterfaceType.GIGABITETHERNET,
+                "interface_number": "1.A",
+            },
+            ValueError,
+            re.escape("interface_number contains unexpected characters: ., A"),
+        ),
+    ]
+
+    @pytest.mark.parametrize("kwargs, error_type, warning", failing_cases)
+    def test_failing_creations(self, kwargs, error_type, warning):
+        """Test failing creations"""
+        with pytest.raises(error_type, match=warning):
+            interface = Interface(**kwargs)  # pyright: ignore
+            return interface
 
 
 class TestInterfaceConfig:
@@ -22,19 +114,19 @@ class TestInterfaceConfig:
     def test_creation_with_no_interface_type_throws_exception(self):
         """Test a creation with no InterfaceType failes"""
         with pytest.raises(TypeError):
-            interface = InterfaceConfig(interface_number="1")  # pyright: ignore
+            interface = InterfaceConfig(Interface(interface_number="1"))  # pyright: ignore
             return interface
 
     def test_creation_with_no_number_type_throws_exception(self):
         """Test a creation with no InterfaceType failes"""
         with pytest.raises(TypeError):
-            interface = InterfaceConfig(InterfaceType.ETHERNET)  # pyright: ignore
+            interface = InterfaceConfig(Interface(InterfaceType.ETHERNET))  # pyright: ignore
             return interface
 
     def test_basic_creation(self):
         """Test with only an InterfaceType"""
         interface = InterfaceConfig(
-            InterfaceType.ETHERNET, interface_number="1"
+            Interface(InterfaceType.ETHERNET, interface_number="1")
         )
         assert interface is not None
         assert interface.ip_address is None
@@ -45,22 +137,25 @@ class TestInterfaceConfig:
     def test_interface_with_ip(self):
         """Test interface creation with IP address."""
         interface = InterfaceConfig(
-            interface_type=InterfaceType.ETHERNET,
-            interface_number="1",
+            Interface(
+                interface_type=InterfaceType.ETHERNET,
+                interface_number="1",
+            ),
             ip_address=IPv4Interface("1.1.1.1/24"),
         )
-        assert interface.interface_type == InterfaceType.ETHERNET
+        assert interface.interface.interface_type == InterfaceType.ETHERNET
         assert interface.ip_address == IPv4Interface("1.1.1.1/24")
         assert interface.dhcp_assigned is not True
 
     def test_interface_with_dhcp(self):
         """Test the IP address can be set with DHCP"""
         interface = InterfaceConfig(
-            interface_type=InterfaceType.ETHERNET,
-            interface_number="1",
+            Interface(
+                interface_type=InterfaceType.ETHERNET, interface_number="1"
+            ),
             dhcp_assigned=True,
         )
-        assert interface.interface_type == InterfaceType.ETHERNET
+        assert interface.interface.interface_type == InterfaceType.ETHERNET
         assert interface.ip_address is None
         assert interface.dhcp_assigned
 
@@ -68,8 +163,10 @@ class TestInterfaceConfig:
         """Test the IP address and DHCP fails"""
         with pytest.raises(Exception):
             interface = InterfaceConfig(
-                interface_type=InterfaceType.ETHERNET,
-                interface_number="1",
+                Interface(
+                    interface_type=InterfaceType.ETHERNET,
+                    interface_number="1",
+                ),
                 dhcp_assigned=True,
                 ip_address=IPv4Interface("1.1.1.1/24"),
             )
@@ -79,8 +176,10 @@ class TestInterfaceConfig:
         """Test the IP address and DHCP fails"""
         with pytest.raises(Exception):
             interface = InterfaceConfig(
-                interface_type=InterfaceType.ETHERNET,
-                interface_number="1",
+                Interface(
+                    interface_type=InterfaceType.ETHERNET,
+                    interface_number="1",
+                ),
                 dhcp_assigned=False,
             )
             return interface
@@ -89,8 +188,7 @@ class TestInterfaceConfig:
     cases = [
         (
             {  # Test with minimal configuration
-                "interface_type": InterfaceType.ETHERNET,
-                "interface_number": "1",
+                "interface": Interface(InterfaceType.ETHERNET, "1"),
             },
             ["interface Ethernet1", "!"],
             {
@@ -104,8 +202,10 @@ class TestInterfaceConfig:
         ),
         (  # Test with an IP address
             {
-                "interface_type": InterfaceType.ETHERNET,
-                "interface_number": "1",
+                "interface": Interface(
+                    InterfaceType.ETHERNET,
+                    "1",
+                ),
                 "ip_address": ipaddress.IPv4Interface("192.168.1.1/24"),
             },
             [
@@ -124,8 +224,10 @@ class TestInterfaceConfig:
         ),
         (  # Test with an IP address and a VRF)
             {
-                "interface_type": InterfaceType.ETHERNET,
-                "interface_number": "1",
+                "interface": Interface(
+                    InterfaceType.ETHERNET,
+                    "1",
+                ),
                 "ip_address": ipaddress.IPv4Interface("1.1.1.1/24"),
                 "vrf": "test",
             },
@@ -146,8 +248,10 @@ class TestInterfaceConfig:
         ),
         (  # Test with DHCP address
             {
-                "interface_type": InterfaceType.ETHERNET,
-                "interface_number": "1",
+                "interface": Interface(
+                    InterfaceType.ETHERNET,
+                    "1",
+                ),
                 "dhcp_assigned": True,
             },
             [
@@ -166,8 +270,10 @@ class TestInterfaceConfig:
         ),
         (  # Test with a description
             {
-                "interface_type": InterfaceType.ETHERNET,
-                "interface_number": 1,
+                "interface": Interface(
+                    InterfaceType.ETHERNET,
+                    "1",
+                ),
                 "description": "Test description",
             },
             ["interface Ethernet1", " description Test description", "!"],
@@ -182,8 +288,10 @@ class TestInterfaceConfig:
         ),
         (  # Test with shutdown
             {
-                "interface_type": InterfaceType.ETHERNET,
-                "interface_number": "1",
+                "interface": Interface(
+                    InterfaceType.ETHERNET,
+                    "1",
+                ),
                 "shutdown": True,
             },
             ["interface Ethernet1", " shutdown", "!"],
@@ -198,8 +306,10 @@ class TestInterfaceConfig:
         ),
         (  # Test with shutdown False
             {
-                "interface_type": InterfaceType.ETHERNET,
-                "interface_number": "1",
+                "interface": Interface(
+                    InterfaceType.ETHERNET,
+                    "1",
+                ),
                 "shutdown": False,
             },
             ["interface Ethernet1", " no shutdown", "!"],
@@ -214,8 +324,10 @@ class TestInterfaceConfig:
         ),
         (  # Test with secondary IPs
             {
-                "interface_type": InterfaceType.VLAN,
-                "interface_number": "10",
+                "interface": Interface(
+                    InterfaceType.VLAN,
+                    "10",
+                ),
                 "ip_address": IPv4Interface("10.0.10.1/24"),
                 "secondary_ip_addresses": [
                     IPv4Interface("10.0.11.1/24"),

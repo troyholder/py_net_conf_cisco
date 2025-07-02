@@ -6,7 +6,7 @@ import pytest
 import sample1
 
 from py_net_conf_cisco import CiscoConfig, InterfaceConfig
-from py_net_conf_cisco.interface_datamodel import InterfaceType
+from py_net_conf_cisco.interface_datamodel import Interface, InterfaceType
 from py_net_conf_cisco.radius_server_datamodel import RadiusServerConfig
 
 
@@ -123,12 +123,16 @@ class TestCiscoConfig:
         [
             (
                 InterfaceConfig(
-                    interface_type=InterfaceType.VLAN,
-                    interface_number="10",
+                    Interface(
+                        interface_type=InterfaceType.VLAN,
+                        interface_number="10",
+                    )
                 ),
                 InterfaceConfig(
-                    interface_type=InterfaceType.VLAN,
-                    interface_number="10",
+                    Interface(
+                        interface_type=InterfaceType.VLAN,
+                        interface_number="10",
+                    ),
                     description="Server VLAN",
                     ip_address=IPv4Interface("10.0.10.1/24"),
                     dhcp_assigned=False,
@@ -137,12 +141,16 @@ class TestCiscoConfig:
             ),
             (
                 InterfaceConfig(
-                    interface_type=InterfaceType.GIGABITETHERNET,
-                    interface_number="0/3",
+                    Interface(
+                        interface_type=InterfaceType.GIGABITETHERNET,
+                        interface_number="0/3",
+                    )
                 ),
                 InterfaceConfig(
-                    interface_type=InterfaceType.GIGABITETHERNET,
-                    interface_number="0/3",
+                    Interface(
+                        interface_type=InterfaceType.GIGABITETHERNET,
+                        interface_number="0/3",
+                    ),
                     description="DHCP Test Interface",
                     ip_address=None,
                     dhcp_assigned=True,
@@ -151,12 +159,16 @@ class TestCiscoConfig:
             ),
             (
                 InterfaceConfig(
-                    interface_type=InterfaceType.VLAN,
-                    interface_number="20",
+                    Interface(
+                        interface_type=InterfaceType.VLAN,
+                        interface_number="20",
+                    ),
                 ),
                 InterfaceConfig(
-                    interface_type=InterfaceType.VLAN,
-                    interface_number="20",
+                    Interface(
+                        interface_type=InterfaceType.VLAN,
+                        interface_number="20",
+                    ),
                     description="VRF VLAN",
                     ip_address=IPv4Interface("10.10.10.1/24"),
                     dhcp_assigned=False,
@@ -166,12 +178,16 @@ class TestCiscoConfig:
             ),
             (
                 InterfaceConfig(
-                    interface_type=InterfaceType.VLAN,
-                    interface_number="30",
+                    Interface(
+                        interface_type=InterfaceType.VLAN,
+                        interface_number="30",
+                    ),
                 ),
                 InterfaceConfig(
-                    interface_type=InterfaceType.VLAN,
-                    interface_number="30",
+                    Interface(
+                        interface_type=InterfaceType.VLAN,
+                        interface_number="30",
+                    ),
                     description="VRF VLAN with secondary IPs",
                     ip_address=IPv4Interface("10.20.10.1/24"),
                     dhcp_assigned=False,
@@ -189,8 +205,10 @@ class TestCiscoConfig:
 
     def test_interface_that_does_not_exist(self, empty_config):
         interface = InterfaceConfig(
-            interface_type=InterfaceType.LOOPBACK,
-            interface_number="1234",
+            Interface(
+                interface_type=InterfaceType.LOOPBACK,
+                interface_number="1234",
+            ),
         )
         assert empty_config.get_interface(interface) is None
 
@@ -199,8 +217,10 @@ class TestCiscoConfig:
         [
             # No change to the secondary IPs
             InterfaceConfig(
-                interface_type=InterfaceType.VLAN,
-                interface_number="30",
+                Interface(
+                    interface_type=InterfaceType.VLAN,
+                    interface_number="30",
+                ),
                 description="Red VRF VLAN with secondary IPs",
                 ip_address=IPv4Interface("1.1.1.1/24"),
                 dhcp_assigned=False,
@@ -212,8 +232,10 @@ class TestCiscoConfig:
             ),
             # Change interface to using DHCP
             InterfaceConfig(
-                interface_type=InterfaceType.VLAN,
-                interface_number="30",
+                Interface(
+                    interface_type=InterfaceType.VLAN,
+                    interface_number="30",
+                ),
                 description="Red VRF VLAN with secondary IPs",
                 dhcp_assigned=True,
                 shutdown=True,
@@ -224,8 +246,10 @@ class TestCiscoConfig:
             ),
             # Change secondaries
             InterfaceConfig(
-                interface_type=InterfaceType.VLAN,
-                interface_number="30",
+                Interface(
+                    interface_type=InterfaceType.VLAN,
+                    interface_number="30",
+                ),
                 description="Red VRF VLAN with secondary IPs",
                 ip_address=IPv4Interface("1.1.1.1/24"),
                 dhcp_assigned=False,
@@ -237,8 +261,10 @@ class TestCiscoConfig:
             ),
             # Removal of secondaries,
             InterfaceConfig(
-                interface_type=InterfaceType.VLAN,
-                interface_number="30",
+                Interface(
+                    interface_type=InterfaceType.VLAN,
+                    interface_number="30",
+                ),
                 description="Red VRF VLAN with secondary IPs",
                 ip_address=IPv4Interface("1.1.1.1/24"),
                 dhcp_assigned=False,
@@ -247,8 +273,10 @@ class TestCiscoConfig:
             ),
             # More secondaries,
             InterfaceConfig(
-                interface_type=InterfaceType.VLAN,
-                interface_number="30",
+                Interface(
+                    interface_type=InterfaceType.VLAN,
+                    interface_number="30",
+                ),
                 description="Red VRF VLAN with secondary IPs",
                 ip_address=IPv4Interface("1.1.1.1/24"),
                 dhcp_assigned=False,
@@ -261,8 +289,10 @@ class TestCiscoConfig:
             ),
             # Less secondaries,
             InterfaceConfig(
-                interface_type=InterfaceType.VLAN,
-                interface_number="40",
+                Interface(
+                    interface_type=InterfaceType.VLAN,
+                    interface_number="40",
+                ),
                 description="Red VRF VLAN with secondary IPs",
                 ip_address=IPv4Interface("1.1.1.1/24"),
                 dhcp_assigned=False,
@@ -274,8 +304,10 @@ class TestCiscoConfig:
             ),
             # Change and more secondaries,
             InterfaceConfig(
-                interface_type=InterfaceType.VLAN,
-                interface_number="30",
+                Interface(
+                    interface_type=InterfaceType.VLAN,
+                    interface_number="30",
+                ),
                 description="Red VRF VLAN with secondary IPs",
                 ip_address=IPv4Interface("1.1.1.1/24"),
                 dhcp_assigned=False,
@@ -288,8 +320,10 @@ class TestCiscoConfig:
             ),
             # Change and less secondaries,
             InterfaceConfig(
-                interface_type=InterfaceType.VLAN,
-                interface_number="40",
+                Interface(
+                    interface_type=InterfaceType.VLAN,
+                    interface_number="40",
+                ),
                 description="Red VRF VLAN with secondary IPs",
                 ip_address=IPv4Interface("1.1.1.1/24"),
                 dhcp_assigned=False,
@@ -301,8 +335,10 @@ class TestCiscoConfig:
             ),
             # Add secondary IP when there was none
             InterfaceConfig(
-                interface_type=InterfaceType.VLAN,
-                interface_number="1",
+                Interface(
+                    interface_type=InterfaceType.VLAN,
+                    interface_number="1",
+                ),
                 ip_address=IPv4Interface("192.168.1.1/24"),
                 dhcp_assigned=False,
                 shutdown=False,
@@ -312,8 +348,10 @@ class TestCiscoConfig:
             ),
             # Start with blank interface,
             InterfaceConfig(
-                interface_type=InterfaceType.GIGABITETHERNET,
-                interface_number="0/4",
+                Interface(
+                    interface_type=InterfaceType.GIGABITETHERNET,
+                    interface_number="0/4",
+                ),
                 description="Red VRF VLAN with secondary IPs",
                 ip_address=IPv4Interface("1.1.1.1/24"),
                 dhcp_assigned=False,
@@ -325,8 +363,10 @@ class TestCiscoConfig:
             ),
             # Start with no interface,
             InterfaceConfig(
-                interface_type=InterfaceType.GIGABITETHERNET,
-                interface_number="0/5",
+                Interface(
+                    interface_type=InterfaceType.GIGABITETHERNET,
+                    interface_number="0/5",
+                ),
                 description="Red VRF VLAN with secondary IPs",
                 ip_address=IPv4Interface("1.1.1.1/24"),
                 dhcp_assigned=False,
@@ -338,16 +378,20 @@ class TestCiscoConfig:
             ),
             # Test ip change from DHCP to static
             InterfaceConfig(
-                interface_type=InterfaceType.GIGABITETHERNET,
-                interface_number="0/3",
+                Interface(
+                    interface_type=InterfaceType.GIGABITETHERNET,
+                    interface_number="0/3",
+                ),
                 ip_address=IPv4Interface("1.1.1.1/24"),
                 dhcp_assigned=False,
                 shutdown=False,
             ),
             # Test enabling and interface
             InterfaceConfig(
-                InterfaceType.VLAN,
-                interface_number="1",
+                Interface(
+                    InterfaceType.VLAN,
+                    interface_number="1",
+                ),
                 ip_address=IPv4Interface("192.168.1.1/24"),
                 dhcp_assigned=False,
                 shutdown=False,
@@ -377,8 +421,10 @@ class TestCiscoConfig:
         line.insert_after("interface GigabitEthernet0/6")
         line.insert_after("interface GigabitEthernet0/6")
         interface = InterfaceConfig(
-            interface_type=InterfaceType.GIGABITETHERNET,
-            interface_number="0/6",
+            Interface(
+                interface_type=InterfaceType.GIGABITETHERNET,
+                interface_number="0/6",
+            ),
         )
         with pytest.raises(ValueError, match="Found multiple interfaces"):
             empty_config._unexpected_config_line(
@@ -396,7 +442,9 @@ class TestCiscoConfig:
         [
             (  # Test for an unknown interface configuration line
                 InterfaceConfig(
-                    interface_type=InterfaceType.VLAN, interface_number="1"
+                    Interface(
+                        interface_type=InterfaceType.VLAN, interface_number="1"
+                    ),
                 ),
                 [
                     " bogus_line",
@@ -405,7 +453,10 @@ class TestCiscoConfig:
             ),
             (  # Test ip config with 5 words that are not a known option)
                 InterfaceConfig(
-                    interface_type=InterfaceType.VLAN, interface_number="1"
+                    Interface(
+                        interface_type=InterfaceType.VLAN,
+                        interface_number="1",
+                    ),
                 ),
                 [
                     " ip address 192.168.1.1 255.255.255.0 bogus",
@@ -414,7 +465,10 @@ class TestCiscoConfig:
             ),
             (  # Test ip config with known option)
                 InterfaceConfig(
-                    interface_type=InterfaceType.VLAN, interface_number="1"
+                    Interface(
+                        interface_type=InterfaceType.VLAN,
+                        interface_number="1",
+                    ),
                 ),
                 [
                     " ip address bogus",
@@ -437,7 +491,10 @@ class TestCiscoConfig:
         [
             (  # Test for an unknown interface configuration line
                 InterfaceConfig(
-                    interface_type=InterfaceType.VLAN, interface_number="1"
+                    Interface(
+                        interface_type=InterfaceType.VLAN,
+                        interface_number="1",
+                    ),
                 ),
                 [
                     " bogus_line",
@@ -446,7 +503,10 @@ class TestCiscoConfig:
             ),
             (  # Test ip config with 5 words that are not a known option
                 InterfaceConfig(
-                    interface_type=InterfaceType.VLAN, interface_number="1"
+                    Interface(
+                        interface_type=InterfaceType.VLAN,
+                        interface_number="1",
+                    ),
                 ),
                 [
                     " ip address 192.168.1.1 255.255.255.0 bogus",
@@ -455,7 +515,10 @@ class TestCiscoConfig:
             ),
             (  # Test ip config with known option
                 InterfaceConfig(
-                    interface_type=InterfaceType.VLAN, interface_number="1"
+                    Interface(
+                        interface_type=InterfaceType.VLAN,
+                        interface_number="1",
+                    ),
                 ),
                 [
                     " ip address bogus",
@@ -475,8 +538,10 @@ class TestCiscoConfig:
 
     def test_add_secondary_with_no_primary(self, config_from_file: CiscoConfig):
         interface = InterfaceConfig(
-            interface_type=InterfaceType.VLAN,
-            interface_number="1",
+            Interface(
+                interface_type=InterfaceType.VLAN,
+                interface_number="1",
+            ),
             secondary_ip_addresses=[
                 IPv4Interface("1.1.1.1/24"),
             ],
