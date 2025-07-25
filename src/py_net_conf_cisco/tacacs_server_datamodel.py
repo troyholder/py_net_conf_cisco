@@ -2,6 +2,80 @@
 Data models for Cisco tacacs server configuration options.
 
 This module provides dataclasses and enums for structuring tacacs server configuration options.
+
+As of 17.9.5 the option tree looks like:
+    aaa group server tacacs+ <group-name>
+    ├── accounting
+    │   └── acknowledge
+    │       └── broadcast
+    ├── cache
+    │   ├── authentication
+    │   │   └── profile <profile-name>
+    │   ├── authorization
+    │   │   └── profile <profile-name>
+    │   └── expiry <seconds>
+    │       ├── enforce
+    │       │   ├── hours
+    │       │   └── minutes
+    │       ├── failover
+    │       │   ├── hours
+    │       │   └── minutes
+    │       ├── hours
+    │       └── minutes
+    ├── dns-alias-lookup
+    ├── host <ip-address|hostname>
+    ├── ip
+    │   ├── tacacs
+    │   │   └── source-interface <interface-type> <interface-number>
+    │   └── vrf
+    │       └── forwarding <vrf-name>
+    ├── ipv6
+    │   └── tacacs
+    │       └── source-interface <ipv6-interface-type> <ipv6-interface-number>
+    ├── pick-method
+    │   ├── least-used
+    │   ├── ordered
+    │   └── round-robin
+    ├── server
+    │   ├── <ip-address|hostname>
+    │   └── name <server-name>
+    ├── server-private
+    │   ├── <ip-address|hostname>
+    │   ├── <ipv6-address>
+    │   ├── fqdn
+    │   └── <server-address-chosen-above>
+    │       ├── key (...)
+    │       ├── nat
+    │       │   ├── key (...)
+    │       │   ├── port <1-65535>
+    │       │   │   ├── key (...)
+    │       │   │   └── timeout <1-1000>
+    │       │   │       └── key (...)
+    │       │   ├── single-connection
+    │       │   │   ├── key (...)
+    │       │   │   ├── port <1-65535>
+    │       │   │   │   ├── key (...)
+    │       │   │   │   └── timeout <1-1000>
+    │       │   │   │       └── key (...)
+    │       │   │   └── timeout <1-1000>
+    │       │   │       └── key (...)
+    │       │   └── timeout <1-1000>
+    │       │       └── key (...)
+    │       ├── port <1-65535>
+    │       │   ├── key (...)
+    │       │   └── timeout <1-1000>
+    │       │       └── key (...)
+    │       ├── single-connection
+    │       │   ├── key (...)
+    │       │   ├── port <1-65535>
+    │       │   │   ├── key (...)
+    │       │   │   └── timeout <1-1000>
+    │       │   │       └── key (...)
+    │       │   └── timeout <1-1000>
+    │       │       └── key (...)
+    │       └── timeout <1-1000>
+    │           └── key (...)
+    └── timeout <seconds>
 """
 
 import collections
