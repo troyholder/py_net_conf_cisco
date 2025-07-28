@@ -60,7 +60,11 @@ class Interface:
             and self.subinterface_number < 0
         ):
             raise ValueError("subinterface_number must be a positive integer")
-        unexpected_chars = set(self.interface_number) - interface_number_chars
+        # interface_number_chars = set(string.digits + "/")
+        unexpected_chars = list(
+            set(self.interface_number) - interface_number_chars
+        )
+        unexpected_chars.sort()
         if unexpected_chars:
             raise ValueError(
                 f"interface_number contains unexpected characters: {', '.join(unexpected_chars)}"
