@@ -78,10 +78,11 @@ As of 17.9.5 the option tree looks like:
     └── timeout <seconds>
 """
 
-import collections
 from dataclasses import dataclass
 from ipaddress import IPv4Address, IPv6Address
-from typing import Optional
+from typing import List, Optional
+
+from .interface_datamodel import Interface
 
 
 @dataclass
@@ -108,26 +109,19 @@ class TacacsServerConfig:
 
 @dataclass
 class TacacsServerGroupConfig:
-    group_name: str
-    servers: list[TacacsServerConfig]
+    name: str
     vrf: Optional[str] = None
-    interface: Optional[str] = None
+    source_interface: Optional[Interface] = None
 
     def __post_init__(self):
-        if len(self.servers) == 0:
-            raise TypeError("servers must be a non-empty list")
-        for index, server in enumerate(self.servers):
-            if type(server) is not TacacsServerConfig:
-                raise TypeError(
-                    f"server at {str(index)} of servers is not a TacacsServerGroupConfig"
-                )
-        duplicates = [
-            server_ip
-            for server_ip, count in collections.Counter(
-                str(server.ip_address) for server in self.servers
-            ).items()
-            if count > 1
-        ]
-        raise TypeError(
-            f"duplicate servers in servers list: {', '.join(duplicates)}"
-        )
+        pass
+
+    def to_config_lines(self) -> List[str]:
+        lines = [f"aaa group server tacacs+ {self.name}"]
+        if self.vrf:
+            lines.append(f" ip vrf forwarding {self.vrf}")
+        if self.source_interface:
+            lines.append(
+                f" ip tacacs source-interface {str(self.source_interface)}"
+            )
+        return lines

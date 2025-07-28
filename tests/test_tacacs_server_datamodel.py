@@ -7,6 +7,7 @@ from ipaddress import IPv4Address
 
 import pytest
 
+from py_net_conf_cisco.interface_datamodel import Interface, InterfaceType
 from py_net_conf_cisco.tacacs_server_datamodel import (
     TacacsServerConfig,
     TacacsServerGroupConfig,
@@ -81,74 +82,8 @@ class TestTacacsServerGroupConfig:
         (
             {},
             re.escape(
-                "TacacsServerGroupConfig.__init__() missing 2 required positional arguments: 'group_name' and 'servers'"
+                "TacacsServerGroupConfig.__init__() missing 1 required positional argument: 'name'"
             ),
-        ),
-        (
-            {
-                "group_name": "tacas_group",
-            },
-            re.escape(
-                "TacacsServerGroupConfig.__init__() missing 1 required positional argument: 'servers'"
-            ),
-        ),
-        (
-            {
-                "servers": [],
-            },
-            re.escape(
-                "TacacsServerGroupConfig.__init__() missing 1 required positional argument: 'group_name'"
-            ),
-        ),
-        (
-            {
-                "group_name": "tacas_group",
-                "servers": [],
-            },
-            re.escape("servers must be a non-empty list"),
-        ),
-        (
-            {
-                "group_name": "tacas_group",
-                "servers": ["1.1.1.1"],
-            },
-            re.escape(
-                "server at 0 of servers is not a TacacsServerGroupConfig"
-            ),
-        ),
-        (
-            {
-                "group_name": "tacas_group",
-                "servers": [
-                    TacacsServerConfig(server1, encrpyted_string),
-                    "1.1.1.1",
-                ],
-            },
-            re.escape(
-                "server at 1 of servers is not a TacacsServerGroupConfig"
-            ),
-        ),
-        (
-            {
-                "group_name": "tacas_group",
-                "servers": [
-                    TacacsServerConfig(server1, encrpyted_string),
-                    TacacsServerConfig(server1, encrpyted_string),
-                ],
-            },
-            re.escape("duplicate servers in servers list: 1.1.1.1"),
-        ),
-        (
-            {
-                "group_name": "tacas_group",
-                "servers": [
-                    TacacsServerConfig(server1, encrpyted_string),
-                    TacacsServerConfig(server1, encrpyted_string),
-                    TacacsServerConfig(server2, encrpyted_string),
-                    TacacsServerConfig(server2, encrpyted_string),
-                ],
-            },
-            re.escape("duplicate servers in servers list: 1.1.1.1, 2.2.2.2"),
         ),
     ]
 
@@ -156,65 +91,54 @@ class TestTacacsServerGroupConfig:
     def test_failing_creations(self, kwargs, warning):
         """Test failing creations"""
         with pytest.raises(TypeError, match=warning):
-            interface = TacacsServerGroupConfig(**kwargs)  # pyright: ignore
-            return interface
+            tacas_server_group_config = TacacsServerGroupConfig(**kwargs)  # pyright: ignore
+            return tacas_server_group_config
 
     working_cases = [
         (  # Minimum requirements
             {
-                "group_name": "tacas_group",
-                "servers": [
-                    TacacsServerConfig(server1, encrpyted_string),
-                ],
+                "name": "tacas_group",
             },
-            [],
+            [
+                "aaa group server tacacs+ tacas_group",
+            ],
         ),
-        (  # Multiple servers
+        (
             {
-                "group_name": "tacas_group",
-                "servers": [
-                    TacacsServerConfig(server1, encrpyted_string),
-                    TacacsServerConfig(server2, encrpyted_string),
-                ],
+                "name": "tacas_group",
+                "vrf": "Mgmt-vrf",
             },
-            [],
+            [
+                "aaa group server tacacs+ tacas_group",
+                " ip vrf forwarding Mgmt-vrf",
+            ],
         ),
-        (  # Multiple servers with vrf
+        (
             {
-                "group_name": "tacas_group",
-                "servers": [
-                    TacacsServerConfig(server1, encrpyted_string),
-                    TacacsServerConfig(server2, encrpyted_string),
-                ],
-                "vrf": "mgmt",
+                "name": "tacas_group",
+                "vrf": "Mgmt-vrf",
+                "source_interface": Interface(
+                    InterfaceType.GIGABITETHERNET, "0/0"
+                ),
             },
-            [],
-        ),
-        (  # Multiple servers with interface
-            {
-                "group_name": "tacas_group",
-                "servers": [
-                    TacacsServerConfig(server1, encrpyted_string),
-                    TacacsServerConfig(server2, encrpyted_string),
-                ],
-                "interface": "GigabitEthernet1",
-            },
-            [],
-        ),
-        (  # Multiple servers with vrf and interface
-            {
-                "group_name": "tacas_group",
-                "servers": [
-                    TacacsServerConfig(server1, encrpyted_string),
-                    TacacsServerConfig(server2, encrpyted_string),
-                ],
-                "vrf": "mgmt",
-                "interface": "GigabitEthernet1",
-            },
-            [],
+            [
+                "aaa group server tacacs+ tacas_group",
+                " ip vrf forwarding Mgmt-vrf",
+                " ip tacacs source-interface GigabitEthernet0/0",
+            ],
         ),
     ]
 
     @pytest.mark.parametrize("kwargs, expected_lines", working_cases)
     def test_working_creations(self, kwargs, expected_lines):
-        pass
+        tacas_server_group_config = TacacsServerGroupConfig(**kwargs)
+        assert tacas_server_group_config.name == kwargs["name"]
+        assert tacas_server_group_config.vrf == kwargs.get("vrf")
+        assert tacas_server_group_config.source_interface == kwargs.get(
+            "source_interface"
+        )
+
+    @pytest.mark.parametrize("kwargs, expected_lines", working_cases)
+    def test_working_creations_to_config_lines(self, kwargs, expected_lines):
+        tacas_server_group_config = TacacsServerGroupConfig(**kwargs)
+        assert tacas_server_group_config.to_config_lines() == expected_lines
