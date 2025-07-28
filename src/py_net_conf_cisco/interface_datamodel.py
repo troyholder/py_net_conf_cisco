@@ -70,6 +70,9 @@ class Interface:
                 f"interface_number contains unexpected characters: {', '.join(unexpected_chars)}"
             )
 
+    def __str__(self) -> str:
+        return f"{self.interface_type.value}{self.interface_number}{'' if self.subinterface_number is None else '.' + str(self.subinterface_number)}"
+
 
 @dataclass
 class InterfaceConfig:
