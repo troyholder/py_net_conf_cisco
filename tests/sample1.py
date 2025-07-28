@@ -81,6 +81,12 @@ radius server radius01
 !
 tacacs-server host 192.168.1.200 port 49 key tacacs_secret
 tacacs-server host 192.168.1.201
+
+aaa group server tacacs+ tacacs-servers
+ server-private 192.168.1.200 key 7 encrypted_string
+ server-private 192.168.1.201 key 7 encrypted_string
+ ip vrf forwarding Mgmt-vrf
+ ip tacacs source-interface GigabitEthernet0/0
 !
 logging host 192.168.1.50
 logging 192.168.1.51
