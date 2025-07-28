@@ -71,9 +71,7 @@ class CiscoConfig:
     ) -> InterfaceConfig | None:
         """Return an InterfaceConfig object of the interface configuration"""
         found = InterfaceConfig(
-            copy(interface.interface_type),
-            interface.interface_number,
-            interface.subinterface_number,
+            copy(interface.interface),
         )
         interface_lines = self._find_interface_lines(interface)
         if len(interface_lines) == 0:
