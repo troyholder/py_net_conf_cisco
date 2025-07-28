@@ -101,6 +101,72 @@ class TestInterface:
             interface = Interface(**kwargs)  # pyright: ignore
             return interface
 
+    working_cases = [
+        (
+            {
+                "interface_type": InterfaceType.GIGABITETHERNET,
+                "interface_number": "9",
+            },
+            "GigabitEthernet9",
+        ),
+        (
+            {
+                "interface_type": InterfaceType.GIGABITETHERNET,
+                "interface_number": "9",
+                "subinterface_number": 11,
+            },
+            "GigabitEthernet9.11",
+        ),
+        (
+            {
+                "interface_type": InterfaceType.GIGABITETHERNET,
+                "interface_number": "1/1",
+            },
+            "GigabitEthernet1/1",
+        ),
+        (
+            {
+                "interface_type": InterfaceType.GIGABITETHERNET,
+                "interface_number": "1/1",
+                "subinterface_number": 11,
+            },
+            "GigabitEthernet1/1.11",
+        ),
+        (
+            {
+                "interface_type": InterfaceType.VLAN,
+                "interface_number": "20",
+            },
+            "Vlan20",
+        ),
+        (
+            {
+                "interface_type": InterfaceType.PORT_CHANNEL,
+                "interface_number": "1",
+            },
+            "Port-channel1",
+        ),
+        (
+            {
+                "interface_type": InterfaceType.PORT_CHANNEL,
+                "interface_number": "1",
+                "subinterface_number": 11,
+            },
+            "Port-channel1.11",
+        ),
+    ]
+
+    @pytest.mark.parametrize("kwargs, string", working_cases)
+    def test_working_creations(self, kwargs, string):
+        interface = Interface(**kwargs)
+        assert interface.interface_type == kwargs["interface_type"]
+        assert interface.interface_number == kwargs["interface_number"]
+
+    @pytest.mark.parametrize("kwargs, string", working_cases)
+    def test_string_representation(self, kwargs, string):
+        interface = Interface(**kwargs)
+        assert str(interface) == string
+
 
 class TestInterfaceConfig:
     """Test class for the InterfaceConfig dataclass."""

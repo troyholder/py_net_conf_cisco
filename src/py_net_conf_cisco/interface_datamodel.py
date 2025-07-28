@@ -70,6 +70,9 @@ class Interface:
                 f"interface_number contains unexpected characters: {', '.join(unexpected_chars)}"
             )
 
+    def __str__(self) -> str:
+        return f"{self.interface_type.value}{self.interface_number}{'' if self.subinterface_number is None else '.' + str(self.subinterface_number)}"
+
 
 @dataclass
 class InterfaceConfig:
@@ -108,7 +111,7 @@ class InterfaceConfig:
 
     def interface_line(self):
         """Return the the parent line for the interface configuration"""
-        return f"interface {self.interface.interface_type.value}{self.interface.interface_number}{'' if self.interface.subinterface_number is None else '.' + str(self.interface.subinterface_number)}"
+        return f"interface {str(self.interface)}"
 
     def to_config_lines(self):
         """
@@ -133,7 +136,7 @@ class InterfaceConfig:
         return lines
 
     def interface_string(self) -> str:
-        return f"interface {self.interface.interface_type.value}{self.interface.interface_number}"
+        return f"interface {str(self.interface)}"
 
     def description_string(self) -> str:
         return f"description {self.description}" if self.description else ""
