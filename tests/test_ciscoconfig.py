@@ -521,7 +521,7 @@ class TestCiscoConfig:
     ):
         last_config_line = config_from_file.last_config_line
         assert last_config_line.text == "end"
-        assert last_config_line.index == 93
+        assert last_config_line.index == 101
 
     @pytest.mark.parametrize(
         "radius_servers",
