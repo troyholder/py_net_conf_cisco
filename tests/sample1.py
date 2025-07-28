@@ -10,6 +10,14 @@ boot-end-marker
 !
 enable secret 5 $1$mERr$hx5rVt7rPNoS4wqbXKX7m0
 !
+vrf definition Blue
+ rd 65500:0
+ !
+ address-family ipv4
+  route-target export 65500:0
+  route-target import 65500:0
+ exit-address-family
+!
 no aaa new-model
 system mtu routing 1500
 !
