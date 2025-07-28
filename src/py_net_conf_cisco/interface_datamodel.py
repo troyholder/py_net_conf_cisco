@@ -111,7 +111,7 @@ class InterfaceConfig:
 
     def interface_line(self):
         """Return the the parent line for the interface configuration"""
-        return f"interface {self.interface.interface_type.value}{self.interface.interface_number}{'' if self.interface.subinterface_number is None else '.' + str(self.interface.subinterface_number)}"
+        return f"interface {str(self.interface)}"
 
     def to_config_lines(self):
         """
@@ -136,7 +136,7 @@ class InterfaceConfig:
         return lines
 
     def interface_string(self) -> str:
-        return f"interface {self.interface.interface_type.value}{self.interface.interface_number}"
+        return f"interface {str(self.interface)}"
 
     def description_string(self) -> str:
         return f"description {self.description}" if self.description else ""
