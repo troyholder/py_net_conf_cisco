@@ -79,9 +79,6 @@ radius server radius01
  address ipv4 192.168.1.101 auth-port 1812 acct-port 1813
  key 7 encrypted_string
 !
-tacacs-server host 192.168.1.200 port 49 key tacacs_secret
-tacacs-server host 192.168.1.201
-
 aaa group server tacacs+ tacacs-servers
  server-private 192.168.1.200 key 7 encrypted_string
  server-private 192.168.1.201 key 7 encrypted_string
