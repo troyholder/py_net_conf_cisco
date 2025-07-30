@@ -64,3 +64,34 @@ class TestLoggingConfig:
         with pytest.raises(exception_class, match=warning):
             logging_server = LoggingConfig(**kwargs)  # pyright: ignore
             return logging_server
+
+    working_cases = [
+        (
+            {
+                "syslog_ip_address": server_1_ipv4_address,
+            },
+            [f"logging host {server_1_ipv4_address}"],
+        ),
+        (
+            {
+                "syslog_fqdn": "foobar",
+            },
+            ["logging host fqdn foobar"],
+        ),
+        (
+            {
+                "syslog_ip_address": server_1_ipv4_address,
+                "vrf": "blue",
+            },
+            [f"logging host {server_1_ipv4_address} vrf blue"],
+        ),
+    ]
+
+    @pytest.mark.parametrize("kwargs, expected_lines", working_cases)
+    def test_working_creations(self, kwargs, expected_lines):
+        assert LoggingConfig(**kwargs)
+
+    @pytest.mark.parametrize("kwargs, expected_lines", working_cases)
+    def test_working_creations_to_config_lines(self, kwargs, expected_lines):
+        logging_server = LoggingConfig(**kwargs)
+        assert logging_server.to_config_lines() == expected_lines

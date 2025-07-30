@@ -6,7 +6,7 @@ This module provides dataclasses and enums for structuring logging server config
 
 from dataclasses import dataclass
 from ipaddress import IPv4Address, IPv6Address
-from typing import Optional
+from typing import List, Optional
 
 
 @dataclass
@@ -45,3 +45,13 @@ class LoggingConfig:
             )
         if not isinstance(self.vrf, str):
             raise TypeError("vrf must be a string.")
+
+    def to_config_lines(self) -> List[str]:
+        config = ""
+        if self.syslog_ip_address:
+            config += f"logging host {self.syslog_ip_address}"
+        elif self.syslog_fqdn:
+            config += f"logging host fqdn {self.syslog_fqdn}"
+        if self.vrf:
+            config += f" vrf {self.vrf}"
+        return [config]
