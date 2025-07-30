@@ -23,7 +23,7 @@ class LoggingConfig:
     """
 
     syslog_ip_address: Optional[IPv4Address | IPv6Address] = None
-    syslog_fqdn: Optional[str] = None
+    syslog_fqdn: Optional[str] = ""
     vrf: Optional[str] = ""
 
     def __post_init__(self):
@@ -37,9 +37,7 @@ class LoggingConfig:
             raise TypeError(
                 "syslog_ip_address must be an IPv4Address or IPv6Address."
             )
-        if self.syslog_fqdn is not None and not isinstance(
-            self.syslog_fqdn, str
-        ):
+        if not isinstance(self.syslog_fqdn, str):
             raise TypeError("syslog_fqdn must be a string.")
         if self.syslog_ip_address and self.syslog_fqdn:
             raise ValueError(
