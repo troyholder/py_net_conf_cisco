@@ -82,7 +82,7 @@ from dataclasses import dataclass, field
 from ipaddress import IPv4Address, IPv6Address
 from typing import List, Optional, Union
 
-from .interface_datamodel import Interface
+from .interfaceconfig import Interface
 
 _KEY_MODES: List[Union[int, None]] = [0, 6, 7, None]
 

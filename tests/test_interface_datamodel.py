@@ -8,7 +8,7 @@ from ipaddress import IPv4Interface
 
 import pytest
 
-from py_net_conf_cisco.interface_datamodel import (
+from py_net_conf_cisco.interfaceconfig import (
     Interface,
     InterfaceConfig,
     InterfaceType,

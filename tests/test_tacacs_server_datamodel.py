@@ -7,7 +7,7 @@ from ipaddress import IPv4Address
 
 import pytest
 
-from py_net_conf_cisco.interface_datamodel import Interface, InterfaceType
+from py_net_conf_cisco.interfaceconfig import Interface, InterfaceType
 from py_net_conf_cisco.tacacsserverconfig import (
     TacacsServerConfig,
     TacacsServerGroupConfig,
