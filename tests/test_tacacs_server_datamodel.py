@@ -84,12 +84,6 @@ class TestTacacsServerConfig:
         assert tacas_server.encrpyted_string == encrpyted_string
 
 
-# aaa group server tacacs+ tacacs-servers
-# server-private 1.1.1.1 key 7 REDACT
-# server-private 2.2.2.2 key 7 REDACT
-# ip vrf forwarding Mgmt-vrf
-# ip tacacs source-interface GigabitEthernet0/0
-#
 class TestTacacsServerGroupConfig:
     failing_cases = [
         (
