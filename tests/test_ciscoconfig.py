@@ -6,8 +6,8 @@ import pytest
 import sample1
 
 from py_net_conf_cisco import CiscoConfig, InterfaceConfig
-from py_net_conf_cisco.interface_datamodel import Interface, InterfaceType
-from py_net_conf_cisco.radius_server_datamodel import RadiusServerConfig
+from py_net_conf_cisco.interfaceconfig import Interface, InterfaceType
+from py_net_conf_cisco.radiusserverconfig import RadiusServerConfig
 
 
 class TestCiscoConfig:

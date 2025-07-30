@@ -8,8 +8,8 @@ from ciscoconfparse2 import CiscoConfParse
 # from ciscoconfparse2.ccp_util import IPv4Address
 from ciscoconfparse2.models_cisco import BaseCfgLine
 
-from .interface_datamodel import InterfaceConfig
-from .radius_server_datamodel import RadiusServerConfig
+from .interfaceconfig import InterfaceConfig
+from .radiusserverconfig import RadiusServerConfig
 
 
 class CiscoConfig:
