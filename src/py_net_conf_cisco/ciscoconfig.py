@@ -9,7 +9,7 @@ from ciscoconfparse2 import CiscoConfParse
 from ciscoconfparse2.models_cisco import BaseCfgLine
 
 from .interface_datamodel import InterfaceConfig
-from .radius_server_datamodel import RadiusServerConfig
+from .radiusserverconfig import RadiusServerConfig
 
 
 class CiscoConfig:

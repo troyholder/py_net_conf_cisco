@@ -6,7 +6,7 @@ from ipaddress import IPv4Address, IPv6Address
 
 import pytest
 
-from py_net_conf_cisco.radius_server_datamodel import RadiusServerConfig
+from py_net_conf_cisco.radiusserverconfig import RadiusServerConfig
 
 
 class TestRadiusServerConfig:
