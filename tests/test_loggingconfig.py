@@ -48,6 +48,14 @@ class TestLoggingConfig:
                 "Only one of syslog_ip_address or syslog_fqdn can be set."
             ),
         ),
+        (
+            {
+                "syslog_ip_address": server_1_ipv4_address,
+                "vrf": 9,
+            },
+            TypeError,
+            re.escape("vrf must be a string."),
+        ),
     ]
 
     @pytest.mark.parametrize("kwargs, exception_class, warning", failing_cases)
