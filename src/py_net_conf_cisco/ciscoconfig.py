@@ -350,10 +350,13 @@ class CiscoConfig:
                 current_server_line[0].delete()
                 self._parsed_config.commit()
 
+    def _logging_server_lines(self):
+        return self._parsed_config.find_objects(r"^logging ")
+
     @property
     def logging_servers(self) -> List[LoggingConfig]:
         found = []
-        server_lines = self._parsed_config.find_objects(r"^logging ")
+        server_lines = self._logging_server_lines()
         for line in server_lines:
             parts = line.text.split()
             for index, word in enumerate(parts):
@@ -365,3 +368,27 @@ class CiscoConfig:
             found.append(loggingconfig_from_lines([line.text]))
 
         return found
+
+    @logging_servers.setter
+    def logging_servers(self, new_servers: List[LoggingConfig]) -> None:
+        current_servers = self._logging_server_lines()
+        current_server_count = len(current_servers)
+        new_server_count = len(new_servers)
+        if current_server_count == 0 and new_server_count == 0:
+            return
+        add_after_line = self.last_config_line
+        last_index = add_after_line.index
+
+        if current_server_count > 0:
+            last_index = current_servers[0].index
+            for line in current_servers[::-1]:
+                line.delete()
+                self._parsed_config.commit()
+
+        for new_server in new_servers[::-1]:
+            for new_server_line in new_server.to_config_lines()[::-1]:
+                self._parsed_config.config_objs.insert(
+                    index=last_index,
+                    item=new_server_line,
+                )
+                self._parsed_config.commit()
