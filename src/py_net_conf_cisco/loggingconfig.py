@@ -5,7 +5,7 @@ This module provides dataclasses and enums for structuring logging server config
 """
 
 from dataclasses import dataclass
-from ipaddress import IPv4Address, IPv6Address
+from ipaddress import IPv4Address, IPv6Address, ip_address
 from typing import List, Optional
 
 
@@ -55,3 +55,68 @@ class LoggingConfig:
         if self.vrf:
             config += f" vrf {self.vrf}"
         return [config]
+
+
+def loggingconfig_from_lines(config_lines: List[str]) -> LoggingConfig:
+    syslog_ip_address = None
+    syslog_fqdn = ""
+    vrf = ""
+    config_line_count = 0
+    vrf_count = 0
+
+    for config_line in config_lines:
+        # Strip lines to find comment lines easier
+        line = config_line.strip()
+        # Skip empty lines
+        if "" == line:
+            continue
+        if config_line_count > 0:
+            raise ValueError(f"Second config line found: {line}")
+
+        parts = line.split()
+        for index, word in enumerate(parts):
+            # For now ignoring all lines that do not start with "logging host"
+            if index == 0:
+                if word[0] == "!":
+                    continue
+                elif word == "logging":
+                    continue
+                else:
+                    raise ValueError(
+                        f"Invalid logging configuration line: {line}"
+                    )
+            elif index == 1:
+                if word == "host":
+                    continue
+                else:
+                    raise ValueError(
+                        f"Invalid logging configuration line: {line}"
+                    )
+            elif index == 2:
+                config_line_count += 1
+                if word == "fqdn":
+                    if len(parts) > index + 1:
+                        syslog_fqdn = parts[3]
+                    else:
+                        raise ValueError(f"Second config line found: {line}")
+                else:
+                    syslog_ip_address = ip_address(word)
+            elif word == "vrf":
+                if vrf_count == 0:
+                    vrf_count += 1
+                    if len(parts) > index + 1:
+                        vrf = parts[index + 1]
+                    else:
+                        raise ValueError(
+                            f"Invalid logging configuration line: {line}"
+                        )
+                else:
+                    raise ValueError(f"Multiple vrfs found: {line}")
+
+    if config_line_count == 0:
+        raise ValueError("No logging configuration found")
+    return LoggingConfig(
+        syslog_ip_address=syslog_ip_address,
+        syslog_fqdn=syslog_fqdn,
+        vrf=vrf,
+    )

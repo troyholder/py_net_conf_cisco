@@ -97,7 +97,7 @@ aaa group server tacacs+ tacacs-servers
  ip tacacs source-interface GigabitEthernet0/0
 !
 logging host 192.168.1.50
-logging 192.168.1.51
+logging host 192.168.1.51 vrf Blue
 !
 line con 0
 line vty 0 4

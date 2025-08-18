@@ -1,14 +1,12 @@
 from copy import copy
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address
 from pathlib import Path
-from typing import Optional, Union
+from typing import List, Optional, Union
 
-from ciscoconfparse2 import CiscoConfParse
-
-# from ciscoconfparse2.ccp_util import IPv4Address
-from ciscoconfparse2.models_cisco import BaseCfgLine
+from ciscoconfparse2 import BaseCfgLine, CiscoConfParse
 
 from .interfaceconfig import InterfaceConfig
+from .loggingconfig import LoggingConfig, loggingconfig_from_lines
 from .radiusserverconfig import RadiusServerConfig
 
 
@@ -30,6 +28,13 @@ class CiscoConfig:
             self._parsed_config = CiscoConfParse(config_lines)
         else:
             self._parsed_config = CiscoConfParse(str(config_path))
+
+    def _last_line(self) -> BaseCfgLine:
+        end_lines = self._parsed_config.find_objects(r"^end$")
+        if end_lines:
+            return self._parsed_config.config_objs[end_lines[0].index - 1]
+        else:
+            return self._parsed_config.config_objs[-1]
 
     @property
     def hostname(self) -> str:
@@ -343,4 +348,47 @@ class CiscoConfig:
                     current_server.text
                 )
                 current_server_line[0].delete()
+                self._parsed_config.commit()
+
+    def _logging_server_lines(self):
+        return self._parsed_config.find_objects(r"^logging ")
+
+    @property
+    def logging_servers(self) -> List[LoggingConfig]:
+        found = []
+        server_lines = self._logging_server_lines()
+        for line in server_lines:
+            parts = line.text.split()
+            for index, word in enumerate(parts):
+                # For now ignoring all lines that do not start with "logging host"
+                if index < 3:
+                    continue
+                elif index == 3:
+                    continue
+            found.append(loggingconfig_from_lines([line.text]))
+
+        return found
+
+    @logging_servers.setter
+    def logging_servers(self, new_servers: List[LoggingConfig]) -> None:
+        current_servers = self._logging_server_lines()
+        current_server_count = len(current_servers)
+        new_server_count = len(new_servers)
+        if current_server_count == 0 and new_server_count == 0:
+            return
+        add_after_line = self.last_config_line
+        last_index = add_after_line.index
+
+        if current_server_count > 0:
+            last_index = current_servers[0].index
+            for line in current_servers[::-1]:
+                line.delete()
+                self._parsed_config.commit()
+
+        for new_server in new_servers[::-1]:
+            for new_server_line in new_server.to_config_lines()[::-1]:
+                self._parsed_config.config_objs.insert(
+                    index=last_index,
+                    item=new_server_line,
+                )
                 self._parsed_config.commit()
