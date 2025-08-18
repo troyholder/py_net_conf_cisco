@@ -3,10 +3,7 @@ from ipaddress import IPv4Address, IPv4Interface, IPv6Address
 from pathlib import Path
 from typing import List, Optional, Union
 
-from ciscoconfparse2 import CiscoConfParse
-
-# from ciscoconfparse2.ccp_util import IPv4Address
-from ciscoconfparse2.models_cisco import BaseCfgLine
+from ciscoconfparse2 import BaseCfgLine, CiscoConfParse
 
 from .interfaceconfig import InterfaceConfig
 from .loggingconfig import LoggingConfig, loggingconfig_from_lines
@@ -31,6 +28,13 @@ class CiscoConfig:
             self._parsed_config = CiscoConfParse(config_lines)
         else:
             self._parsed_config = CiscoConfParse(str(config_path))
+
+    def _last_line(self) -> BaseCfgLine:
+        end_lines = self._parsed_config.find_objects(r"^end$")
+        if end_lines:
+            return self._parsed_config.config_objs[end_lines[0].index - 1]
+        else:
+            return self._parsed_config.config_objs[-1]
 
     @property
     def hostname(self) -> str:

@@ -56,6 +56,15 @@ class TestCiscoConfig:
         config = CiscoConfig(config_path=sample_config_file)
         assert config._parsed_config is not None
 
+    last_line_params = [("empty_config", -1), ("config_from_file", -2)]
+
+    @pytest.mark.parametrize("config, expected", last_line_params)
+    def test__last_line(self, config, expected, request):
+        config = request.getfixturevalue(config)
+        assert (
+            config._last_line() == config._parsed_config.config_objs[expected]
+        )
+
     def find_hostname_line(self, parsed_config):
         return parsed_config.find_objects(r"^hostname\s+")[0]
 
