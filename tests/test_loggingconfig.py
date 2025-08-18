@@ -156,3 +156,9 @@ class TestLoggingConfig:
         with pytest.raises(exception_class, match=warning):
             logging_server = loggingconfig_from_lines(lines)  # pyright: ignore
             return logging_server
+
+    @pytest.mark.parametrize("kwargs, expected_lines", working_cases)
+    def test_working_loggingconfig_from_lines(self, kwargs, expected_lines):
+        assert loggingconfig_from_lines(expected_lines) == LoggingConfig(
+            **kwargs
+        )
