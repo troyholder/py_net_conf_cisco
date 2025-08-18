@@ -106,7 +106,6 @@ def loggingconfig_from_lines(config_lines: List[str]) -> LoggingConfig:
                     vrf_count += 1
                     if len(parts) > index + 1:
                         vrf = parts[index + 1]
-                        print(f"vrf: {vrf}")
                     else:
                         raise ValueError(
                             f"Invalid logging configuration line: {line}"
