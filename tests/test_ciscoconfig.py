@@ -675,27 +675,22 @@ class TestCiscoConfig:
         assert config_from_file.radius_servers == radius_servers
 
     logging_server_configs = [
-        (empty_config, []),
+        ("empty_config", []),
+        (
+            "config_from_file",
+            [
+                LoggingConfig(
+                    syslog_ip_address=IPv4Address("192.168.1.50"),
+                ),
+                LoggingConfig(
+                    syslog_ip_address=IPv4Address("192.168.1.51"),
+                    vrf="Blue",
+                ),
+            ],
+        ),
     ]
 
-    @pytest.mark.parametrize(
-        "config, logging_configs",
-        [
-            ("empty_config", []),
-            (
-                "config_from_file",
-                [
-                    LoggingConfig(
-                        syslog_ip_address=IPv4Address("192.168.1.50"),
-                    ),
-                    LoggingConfig(
-                        syslog_ip_address=IPv4Address("192.168.1.51"),
-                        vrf="Blue",
-                    ),
-                ],
-            ),
-        ],
-    )
+    @pytest.mark.parametrize("config, logging_configs", logging_server_configs)
     def test_logging_servers_property(
         self,
         config,
