@@ -683,7 +683,7 @@ class TestCiscoConfig:
         config_from_file.radius_servers = radius_servers
         assert config_from_file.radius_servers == radius_servers
 
-    logging_server_configs = [
+    get_logging_server_configs = [
         ("empty_config", []),
         (
             "config_from_file",
@@ -699,7 +699,9 @@ class TestCiscoConfig:
         ),
     ]
 
-    @pytest.mark.parametrize("config, logging_configs", logging_server_configs)
+    @pytest.mark.parametrize(
+        "config, logging_configs", get_logging_server_configs
+    )
     def test_logging_servers_property(
         self,
         config,
