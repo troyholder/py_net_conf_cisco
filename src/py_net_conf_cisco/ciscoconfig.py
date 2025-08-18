@@ -1,7 +1,7 @@
 from copy import copy
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address
 from pathlib import Path
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 from ciscoconfparse2 import CiscoConfParse
 
@@ -9,6 +9,7 @@ from ciscoconfparse2 import CiscoConfParse
 from ciscoconfparse2.models_cisco import BaseCfgLine
 
 from .interfaceconfig import InterfaceConfig
+from .loggingconfig import LoggingConfig, loggingconfig_from_lines
 from .radiusserverconfig import RadiusServerConfig
 
 
@@ -344,3 +345,19 @@ class CiscoConfig:
                 )
                 current_server_line[0].delete()
                 self._parsed_config.commit()
+
+    @property
+    def logging_servers(self) -> List[LoggingConfig]:
+        found = []
+        server_lines = self._parsed_config.find_objects(r"^logging ")
+        for line in server_lines:
+            parts = line.text.split()
+            for index, word in enumerate(parts):
+                # For now ignoring all lines that do not start with "logging host"
+                if index < 3:
+                    continue
+                elif index == 3:
+                    continue
+            found.append(loggingconfig_from_lines([line.text]))
+
+        return found
