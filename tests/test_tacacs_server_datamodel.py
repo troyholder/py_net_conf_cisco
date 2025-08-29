@@ -73,7 +73,7 @@ class TestTacacsServerConfig:
     def test_failing_creation(self, kwargs, warning):
         """Test failing creations"""
         with pytest.raises(TypeError, match=warning):
-            interface = TacacsServerConfig(**kwargs)  # pyright: ignore
+            interface = TacacsServerConfig(**kwargs)  # pyright: ignore   # ty: ignore[missing-argument]
             return interface
 
     def test_working_createion(self):
@@ -138,7 +138,7 @@ class TestTacacsServerGroupConfig:
     def test_failing_creations(self, kwargs, warning):
         """Test failing creations"""
         with pytest.raises(TypeError, match=warning):
-            tacas_server_group_config = TacacsServerGroupConfig(**kwargs)  # pyright: ignore
+            tacas_server_group_config = TacacsServerGroupConfig(**kwargs)  # pyright: ignore # ty: ignore[missing-argument]
             return tacas_server_group_config
 
     working_cases = [
@@ -226,7 +226,7 @@ class TestTacacsServerGroupConfig:
 
     @pytest.mark.parametrize("kwargs, expected_lines", working_cases)
     def test_working_creations(self, kwargs, expected_lines):
-        tacas_server_group_config = TacacsServerGroupConfig(**kwargs)
+        tacas_server_group_config = TacacsServerGroupConfig(**kwargs)  # ty: ignore[missing-argument]
         assert tacas_server_group_config.name == kwargs["name"]
         assert tacas_server_group_config.vrf == kwargs.get("vrf")
         assert tacas_server_group_config.source_interface == kwargs.get(
@@ -235,7 +235,7 @@ class TestTacacsServerGroupConfig:
 
     @pytest.mark.parametrize("kwargs, expected_lines", working_cases)
     def test_working_creations_to_config_lines(self, kwargs, expected_lines):
-        tacas_server_group_config = TacacsServerGroupConfig(**kwargs)
+        tacas_server_group_config = TacacsServerGroupConfig(**kwargs)  # ty: ignore[missing-argument]
         assert tacas_server_group_config.to_config_lines() == expected_lines
 
 

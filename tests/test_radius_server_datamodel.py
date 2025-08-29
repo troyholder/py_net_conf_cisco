@@ -222,7 +222,7 @@ class TestRadiusServerConfig:
     def test_failing_creation(self, kwargs):
         """Test a failing creation"""
         with pytest.raises(TypeError):
-            interface = RadiusServerConfig(**kwargs)  # pyright: ignore
+            interface = RadiusServerConfig(**kwargs)  # pyright: ignore  # ty: ignore[missing-argument]
             return interface
 
     working_cases = [
@@ -379,7 +379,7 @@ class TestRadiusServerConfig:
     def test_working_creations(
         self, kwargs, ip, name, key, auth_port, acct_port, config_lines
     ):
-        radius_server = RadiusServerConfig(**kwargs)
+        radius_server = RadiusServerConfig(**kwargs)  # ty: ignore[missing-argument]
         assert radius_server.ip_address == ip
         assert radius_server.name == name
         assert radius_server.auth_port == auth_port
@@ -392,5 +392,5 @@ class TestRadiusServerConfig:
     def test_working_creations_config_lines(
         self, kwargs, ip, name, key, auth_port, acct_port, config_lines
     ):
-        radius_server = RadiusServerConfig(**kwargs)
+        radius_server = RadiusServerConfig(**kwargs)  # ty: ignore[missing-argument]
         assert radius_server.to_config_lines() == config_lines

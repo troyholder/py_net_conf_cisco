@@ -98,7 +98,7 @@ class TestInterface:
     def test_failing_creations(self, kwargs, error_type, warning):
         """Test failing creations"""
         with pytest.raises(error_type, match=warning):
-            interface = Interface(**kwargs)  # pyright: ignore
+            interface = Interface(**kwargs)  # pyright: ignore  # ty: ignore[missing-argument]
             return interface
 
     working_cases = [
@@ -158,13 +158,13 @@ class TestInterface:
 
     @pytest.mark.parametrize("kwargs, string", working_cases)
     def test_working_creations(self, kwargs, string):
-        interface = Interface(**kwargs)
+        interface = Interface(**kwargs)  # ty: ignore[missing-argument]
         assert interface.interface_type == kwargs["interface_type"]
         assert interface.interface_number == kwargs["interface_number"]
 
     @pytest.mark.parametrize("kwargs, string", working_cases)
     def test_string_representation(self, kwargs, string):
-        interface = Interface(**kwargs)
+        interface = Interface(**kwargs)  # ty: ignore[missing-argument]
         assert str(interface) == string
 
 
@@ -174,19 +174,19 @@ class TestInterfaceConfig:
     def test_empty_creation_throws_excptions(self):
         """Test a empty creation fails"""
         with pytest.raises(TypeError):
-            interface = InterfaceConfig()  # pyright: ignore
+            interface = InterfaceConfig()  # pyright: ignore  # ty: ignore[missing-argument]
             return interface
 
     def test_creation_with_no_interface_type_throws_exception(self):
         """Test a creation with no InterfaceType failes"""
         with pytest.raises(TypeError):
-            interface = InterfaceConfig(Interface(interface_number="1"))  # pyright: ignore
+            interface = InterfaceConfig(Interface(interface_number="1"))  # pyright: ignore  # ty: ignore[missing-argument]
             return interface
 
     def test_creation_with_no_number_type_throws_exception(self):
         """Test a creation with no InterfaceType failes"""
         with pytest.raises(TypeError):
-            interface = InterfaceConfig(Interface(InterfaceType.ETHERNET))  # pyright: ignore
+            interface = InterfaceConfig(Interface(InterfaceType.ETHERNET))  # pyright: ignore  # ty: ignore[missing-argument]
             return interface
 
     def test_basic_creation(self):
@@ -423,19 +423,19 @@ class TestInterfaceConfig:
 
     @pytest.mark.parametrize("kwargs,expected_lines,expected_strings", cases)
     def test_to_interface_line(self, kwargs, expected_lines, expected_strings):
-        interface = InterfaceConfig(**kwargs)
+        interface = InterfaceConfig(**kwargs)  # ty: ignore[missing-argument]
         assert interface.interface_line() == expected_lines[0]
 
     @pytest.mark.parametrize("kwargs,expected_lines,expected_strings", cases)
     def test_to_config_lines(self, kwargs, expected_lines, expected_strings):
-        interface = InterfaceConfig(**kwargs)
+        interface = InterfaceConfig(**kwargs)  # ty: ignore[missing-argument]
         assert interface.to_config_lines() == expected_lines
 
     @pytest.mark.parametrize("kwargs,expected_lines,expected_strings", cases)
     def test_to_expected_strings(
         self, kwargs, expected_lines, expected_strings
     ):
-        interface = InterfaceConfig(**kwargs)
+        interface = InterfaceConfig(**kwargs)  # ty: ignore[missing-argument]
         assert (
             interface.interface_string() == expected_strings["interface_string"]
         )
