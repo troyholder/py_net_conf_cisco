@@ -81,7 +81,7 @@ class TestTacacsServerConfig:
             tacacs_server = TacacsServerConfig(**kwargs)  # ty: ignore[missing-argument]
             return tacacs_server
 
-    def test_working_createion(self):
+    def test_working_creation(self):
         tacas_server = TacacsServerConfig(
             ip_address=server1, encrpyted_string=encrpyted_string
         )
