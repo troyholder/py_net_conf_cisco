@@ -3,7 +3,6 @@ Test suite for the tacacs server datamodels.
 """
 
 import re
-from ipaddress import IPv4Address
 
 import pytest
 import vars
@@ -11,10 +10,6 @@ import vars
 from py_net_conf_cisco.tacacsserverconfig import (
     TacacsServerConfig,
 )
-
-server1 = IPv4Address("1.1.1.1")
-server2 = IPv4Address("2.2.2.2")
-encrpyted_string = "encrpyted_string"
 
 
 class TestTacacsServerConfig:
@@ -30,7 +25,7 @@ class TestTacacsServerConfig:
         ),
         (
             {
-                "ip_address": server1,
+                "ip_address": vars.server_1_ipv4_address,
             },
             TypeError,
             re.escape(
@@ -39,7 +34,7 @@ class TestTacacsServerConfig:
         ),
         (
             {
-                "encrpyted_string": encrpyted_string,
+                "encrpyted_string": vars.encrpyted_string_1,
             },
             TypeError,
             re.escape(
@@ -49,7 +44,7 @@ class TestTacacsServerConfig:
         (
             {
                 "ip_address": "1.1.1.1",
-                "encrpyted_string": encrpyted_string,
+                "encrpyted_string": vars.encrpyted_string_1,
             },
             TypeError,
             re.escape(
@@ -58,7 +53,7 @@ class TestTacacsServerConfig:
         ),
         (
             {
-                "ip_address": server1,
+                "ip_address": vars.server_1_ipv4_address,
                 "encrpyted_string": 1234,
             },
             TypeError,
