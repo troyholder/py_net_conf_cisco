@@ -6,6 +6,7 @@ import re
 from ipaddress import IPv4Address
 
 import pytest
+import vars
 
 from py_net_conf_cisco.interfaceconfig import Interface, InterfaceType
 from py_net_conf_cisco.tacacsserverconfig import (
@@ -81,12 +82,26 @@ class TestTacacsServerConfig:
             tacacs_server = TacacsServerConfig(**kwargs)  # ty: ignore[missing-argument]
             return tacacs_server
 
-    def test_working_creation(self):
-        tacas_server = TacacsServerConfig(
-            ip_address=server1, encrpyted_string=encrpyted_string
-        )
-        assert tacas_server.ip_address == server1
-        assert tacas_server.encrpyted_string == encrpyted_string
+    working_cases = [
+        (
+            {
+                "ip_address": vars.server_1_ipv4_address,
+                "encrpyted_string": vars.encrpyted_string_1,
+            },
+            [
+                f"tacacs-server host {vars.server_1_ipv4_address} key {vars.encrpyted_string_1}",
+            ],
+        ),
+    ]
+
+    @pytest.mark.parametrize("kwargs, expected_lines", working_cases)
+    def test_working_creation(self, kwargs, expected_lines):
+        assert TacacsServerConfig(**kwargs)
+
+    @pytest.mark.parametrize("kwargs, expected_lines", working_cases)
+    def test_working_creations_to_config_lines(self, kwargs, expected_lines):
+        tacas_server = TacacsServerConfig(**kwargs)
+        assert tacas_server.to_config_lines() == expected_lines
 
 
 class TestTacacsServerGroupConfig:

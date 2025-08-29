@@ -108,6 +108,11 @@ class TacacsServerConfig:
         if not isinstance(self.encrpyted_string, str):
             raise TypeError("encrpyted_string must be a string")
 
+    def to_config_lines(self) -> List[str]:
+        return [
+            f"tacacs-server host {self.ip_address} key {self.encrpyted_string}",
+        ]
+
 
 @dataclass
 class TacacsServerPrivateConfig:
