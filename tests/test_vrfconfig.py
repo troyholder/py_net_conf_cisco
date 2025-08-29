@@ -23,7 +23,7 @@ class TestVRFConfig:
     def test_vrf_config_failing_cases(self, kwargs):
         """Test VRFConfig instantiation with no name fails"""
         with pytest.raises(Exception):
-            vrf = VRFConfig(**kwargs)
+            vrf = VRFConfig(**kwargs)  # ty: ignore[missing-argument]
             return vrf
 
     working_cases = [
@@ -98,7 +98,7 @@ class TestVRFConfig:
     @pytest.mark.parametrize("kwargs, config_lines", working_cases)
     def test_vrf_config_working_cases(self, kwargs, config_lines):
         """Test VRFConfig instantiation"""
-        vrf = VRFConfig(**kwargs)
+        vrf = VRFConfig(**kwargs)  # ty: ignore[missing-argument]
 
         assert vrf.to_config_lines() == config_lines
 
