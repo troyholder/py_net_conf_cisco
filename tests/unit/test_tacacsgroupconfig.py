@@ -3,9 +3,9 @@ Test suite for the tacacs server datamodels.
 """
 
 import re
-from ipaddress import IPv4Address
 
 import pytest
+import vars
 
 from py_net_conf_cisco.interfaceconfig import Interface, InterfaceType
 from py_net_conf_cisco.tacacsgroupconfig import (
@@ -13,14 +13,15 @@ from py_net_conf_cisco.tacacsgroupconfig import (
     TacacsServerPrivateConfig,
 )
 
-server1 = IPv4Address("1.1.1.1")
-server2 = IPv4Address("2.2.2.2")
-encrpyted_string = "encrpyted_string"
 server_private_1 = TacacsServerPrivateConfig(
-    ip_address=server1, key_mode=0, key=encrpyted_string
+    ip_address=vars.server_1_ipv4_address,
+    key_mode=0,
+    key=vars.encrpyted_string_1,
 )
 server_private_2 = TacacsServerPrivateConfig(
-    ip_address=server2, key_mode=0, key=encrpyted_string
+    ip_address=vars.server_2_ipv4_address,
+    key_mode=0,
+    key=vars.encrpyted_string_2,
 )
 
 
@@ -201,31 +202,35 @@ class TestTacacsServerPrivateConfig:
         ),
         (
             {
-                "ip_address": server1,
+                "ip_address": vars.server_1_ipv4_address,
                 "fqdn": "foo.bar",
             },
             re.escape("must not set ip_address and fqdn"),
         ),
         (
             {
-                "ip_address": server1,
+                "ip_address": vars.server_1_ipv4_address,
                 "key_mode": 1,
             },
             re.escape("key_mode must be 0, 6, 7, or None"),
         ),
         (
             {
-                "ip_address": server1,
+                "ip_address": vars.server_1_ipv4_address,
                 "key_mode": "1",
             },
             re.escape("key_mode must be 0, 6, 7, or None"),
         ),
         (
-            {"ip_address": server1, "key_mode": 0, "key": 9},
+            {"ip_address": vars.server_1_ipv4_address, "key_mode": 0, "key": 9},
             re.escape("key must be a string that does not start with a space"),
         ),
         (
-            {"ip_address": server1, "key_mode": 0, "key": " foo"},
+            {
+                "ip_address": vars.server_1_ipv4_address,
+                "key_mode": 0,
+                "key": " foo",
+            },
             re.escape(
                 "key must not start with spaces to avoid possible issues"
             ),
@@ -242,9 +247,9 @@ class TestTacacsServerPrivateConfig:
     working_cases = [
         (
             {
-                "ip_address": server1,
+                "ip_address": vars.server_1_ipv4_address,
             },
-            [f" server-private {str(server1)}"],
+            [f" server-private {str(vars.server_1_ipv4_address)}"],
         ),
         (
             {
@@ -254,29 +259,57 @@ class TestTacacsServerPrivateConfig:
         ),
         (
             {
-                "ip_address": server1,
+                "ip_address": vars.server_1_ipv4_address,
             },
-            [f" server-private {str(server1)}"],
+            [f" server-private {str(vars.server_1_ipv4_address)}"],
         ),
         (
-            {"ip_address": server1, "key": encrpyted_string},
-            [f" server-private {str(server1)} {encrpyted_string}"],
+            {
+                "ip_address": vars.server_1_ipv4_address,
+                "key": vars.encrpyted_string_1,
+            },
+            [
+                f" server-private {str(vars.server_1_ipv4_address)} {vars.encrpyted_string_1}"
+            ],
         ),
         (
-            {"ip_address": server1, "key_mode": 0, "key": encrpyted_string},
-            [f" server-private {str(server1)} 0 {encrpyted_string}"],
+            {
+                "ip_address": vars.server_1_ipv4_address,
+                "key_mode": 0,
+                "key": vars.encrpyted_string_1,
+            },
+            [
+                f" server-private {str(vars.server_1_ipv4_address)} 0 {vars.encrpyted_string_1}"
+            ],
         ),
         (
-            {"ip_address": server1, "key": encrpyted_string},
-            [f" server-private {str(server1)} {encrpyted_string}"],
+            {
+                "ip_address": vars.server_1_ipv4_address,
+                "key": vars.encrpyted_string_1,
+            },
+            [
+                f" server-private {str(vars.server_1_ipv4_address)} {vars.encrpyted_string_1}"
+            ],
         ),
         (
-            {"ip_address": server1, "key_mode": 6, "key": encrpyted_string},
-            [f" server-private {str(server1)} 6 {encrpyted_string}"],
+            {
+                "ip_address": vars.server_1_ipv4_address,
+                "key_mode": 6,
+                "key": vars.encrpyted_string_1,
+            },
+            [
+                f" server-private {str(vars.server_1_ipv4_address)} 6 {vars.encrpyted_string_1}"
+            ],
         ),
         (
-            {"ip_address": server1, "key_mode": 7, "key": encrpyted_string},
-            [f" server-private {str(server1)} 7 {encrpyted_string}"],
+            {
+                "ip_address": vars.server_1_ipv4_address,
+                "key_mode": 7,
+                "key": vars.encrpyted_string_1,
+            },
+            [
+                f" server-private {str(vars.server_1_ipv4_address)} 7 {vars.encrpyted_string_1}"
+            ],
         ),
     ]
 
