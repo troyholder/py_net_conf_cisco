@@ -66,17 +66,17 @@ class TestCiscoConfig:
     ]
 
     @pytest.mark.parametrize(
-        "config, tacas_server_configs", get_tacacs_server_configs
+        "config, tacacs_server_configs", get_tacacs_server_configs
     )
-    def test_tacas_servers_property(
+    def test_tacacs_servers_property(
         self,
         config,
-        tacas_server_configs: list[TacacsServerConfig],
+        tacacs_server_configs: list[TacacsServerConfig],
         request,
     ):
         assert (
             request.getfixturevalue(config).tacacs_server_servers
-            == tacas_server_configs
+            == tacacs_server_configs
         )
 
     set_tacacs_server_server_configs = [
