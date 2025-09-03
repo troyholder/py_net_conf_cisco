@@ -8,6 +8,7 @@ from ciscoconfparse2 import BaseCfgLine, CiscoConfParse
 from .interfaceconfig import InterfaceConfig
 from .loggingconfig import LoggingConfig, loggingconfig_from_lines
 from .radiusserverconfig import RadiusServerConfig
+from .tacacsserverconfig import TacacsServerConfig
 
 
 class CiscoConfig:
@@ -391,4 +392,56 @@ class CiscoConfig:
                     index=last_index,
                     item=new_server_line,
                 )
+                self._parsed_config.commit()
+
+    def _find_tacacs_server_lines(self) -> list[BaseCfgLine]:
+        return self._parsed_config.find_objects(r"^tacacs-server host")
+
+    @property
+    def tacacs_servers(self) -> list[TacacsServerConfig]:
+        found = []
+        server_lines = self._find_tacacs_server_lines()
+        for line in server_lines:
+            parts = line.text.strip().split()
+            ip_address = IPv4Address(parts[2])
+            if len(parts) > 3:
+                if parts[3] == "key":
+                    encrpyted_string = parts[4]
+            else:
+                encrpyted_string = None
+
+            found.append(
+                TacacsServerConfig(
+                    ip_address=ip_address,
+                    encrpyted_string=encrpyted_string,
+                )
+            )
+        return found
+
+    @tacacs_servers.setter
+    def tacacs_servers(self, new_servers: list[TacacsServerConfig]) -> None:
+        current_servers = self._find_tacacs_server_lines()
+        current_server_count = len(current_servers)
+        new_server_count = len(new_servers)
+        if current_server_count == 0 and new_server_count == 0:
+            return
+
+        if current_server_count == 0:
+            add_before_line = self.last_config_line
+        else:
+            last_current_radius_line = current_servers[-1]
+            index = self._parsed_config.objs.index(last_current_radius_line)
+            add_before_line = self._parsed_config.objs[index + 1]
+
+        for new_server in new_servers[::-1]:
+            for line in new_server.to_config_lines()[::-1]:
+                self._parsed_config.objs.insert(add_before_line.index, line)
+                self._parsed_config.commit()
+
+        if current_server_count > 0:
+            for current_server in current_servers[::-1]:
+                current_server_line = self._parsed_config.find_objects(
+                    current_server.text
+                )
+                current_server_line[0].delete()
                 self._parsed_config.commit()
