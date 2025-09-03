@@ -67,7 +67,7 @@ class TestCiscoConfig:
         request,
     ):
         assert (
-            request.getfixturevalue(config).tacacs_server_servers
+            request.getfixturevalue(config).tacacs_servers
             == tacacs_server_configs
         )
 
@@ -109,5 +109,5 @@ class TestCiscoConfig:
         request,
     ):
         config = request.getfixturevalue(config)
-        config.tacacs_server_servers = tacacs_server_configs
-        assert config.tacacs_server_servers == tacacs_server_configs
+        config.tacacs_servers = tacacs_server_configs
+        assert config.tacacs_servers == tacacs_server_configs
