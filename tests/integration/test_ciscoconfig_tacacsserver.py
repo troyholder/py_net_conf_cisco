@@ -75,7 +75,7 @@ class TestCiscoConfig:
         request,
     ):
         assert (
-            request.getfixturevalue(config).tacas_server_servers
+            request.getfixturevalue(config).tacacs_server_servers
             == tacas_server_configs
         )
 
