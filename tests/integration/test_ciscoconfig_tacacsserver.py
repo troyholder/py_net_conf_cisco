@@ -102,7 +102,7 @@ class TestCiscoConfig:
     @pytest.mark.parametrize(
         "config, tacacs_server_configs", set_tacacs_server_server_configs
     )
-    def test_tacacs_server_servers_setter(
+    def test_tacacs_servers_setter(
         self,
         config,
         tacacs_server_configs: list[TacacsServerConfig],
