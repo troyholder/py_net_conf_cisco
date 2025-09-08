@@ -5,13 +5,13 @@ from py_net_conf_cisco.vrfconfig import VRFConfig
 # Objects for sample1.py
 sample_vrf_1 = VRFConfig(
     name="Blue",
-    rd="rd 65500:0",
+    rd="65500:0",
 )
 
 # Objects for tests
 test_vrf_1 = VRFConfig(
     name="Red",
-    rd="rd 65511:10",
+    rd="65511:10",
 )
 test_vrf_2 = VRFConfig(
     name="Green",
@@ -28,7 +28,7 @@ class TestCiscoConfig:
         (
             "config_from_file",
             [
-                test_vrf_1,
+                sample_vrf_1,
             ],
         ),
     ]
