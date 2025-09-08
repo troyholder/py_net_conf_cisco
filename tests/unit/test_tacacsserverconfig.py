@@ -9,6 +9,7 @@ import vars
 
 from py_net_conf_cisco.tacacsserverconfig import (
     TacacsServerConfig,
+    tacas_server_from_config_lines,
 )
 
 
@@ -88,3 +89,8 @@ class TestTacacsServerConfig:
     def test_working_creations_to_config_lines(self, kwargs, expected_lines):
         tacas_server = TacacsServerConfig(**kwargs)
         assert tacas_server.to_config_lines() == expected_lines
+
+    @pytest.mark.parametrize("kwargs, expected_lines", working_cases)
+    def test_working_creations_from_config_lines(self, kwargs, expected_lines):
+        tacas_server = TacacsServerConfig(**kwargs)
+        assert tacas_server_from_config_lines(expected_lines) == tacas_server
