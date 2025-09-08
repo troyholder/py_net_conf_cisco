@@ -45,7 +45,7 @@ class VRFConfig:
         return lines
 
 
-def from_config_lines(lines: List[str]) -> Optional[VRFConfig]:
+def vrf_from_config_lines(lines: List[str]) -> Optional[VRFConfig]:
     """
     Parse VRF configuration lines and return a VRFConfig object.
 
