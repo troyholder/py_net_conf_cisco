@@ -551,7 +551,6 @@ class CiscoConfig:
         found = []
         vrf_lines = self._find_vrf_lines()
         for line in vrf_lines:
-            print(line.text)
             found.append(vrf_from_config_lines([line.text] + line.children))
         return found
 
