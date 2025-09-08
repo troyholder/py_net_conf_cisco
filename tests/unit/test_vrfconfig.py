@@ -4,7 +4,7 @@ Test suite for the VRF datamodels.
 
 import pytest
 
-from py_net_conf_cisco.vrfconfig import VRFConfig
+from py_net_conf_cisco.vrfconfig import VRFConfig, from_config_lines
 
 
 class TestVRFConfig:
@@ -112,4 +112,4 @@ class TestVRFConfig:
     @pytest.mark.parametrize("kwargs, config_lines", working_cases)
     def test_working_creations_from_config_lines(self, kwargs, config_lines):
         """Test VRFConfig instantiation"""
-        assert VRFConfig.from_config_lines(config_lines) == VRFConfig(**kwargs)
+        assert from_config_lines(config_lines) == VRFConfig(**kwargs)
