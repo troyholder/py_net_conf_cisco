@@ -5,9 +5,13 @@ from typing import List, Optional, Union
 
 from ciscoconfparse2 import BaseCfgLine, CiscoConfParse
 
-from .interfaceconfig import InterfaceConfig
+from .interfaceconfig import Interface, InterfaceConfig, InterfaceType
 from .loggingconfig import LoggingConfig, loggingconfig_from_lines
 from .radiusserverconfig import RadiusServerConfig
+from .tacacsgroupconfig import (
+    TacacsServerGroupConfig,
+    TacacsServerPrivateConfig,
+)
 from .tacacsserverconfig import TacacsServerConfig
 
 
@@ -64,6 +68,18 @@ class CiscoConfig:
                     )
                 else:
                     self._parsed_config = CiscoConfParse([f"hostname {value}"])
+
+    def _parse_interface_from_string(self, interface_string: str) -> Interface:
+        for interface_type in InterfaceType:
+            if interface_string.startswith(interface_type.value):
+                interface_number = interface_string[len(interface_type.value) :]
+                return Interface(
+                    interface_type=interface_type,
+                    interface_number=interface_number,
+                )
+        raise ValueError(
+            f"Could not parse interface string: {interface_string}"
+        )
 
     def _unexpected_config_line(self, line):
         raise ValueError(f"Unexpected config line: {line.text}")
@@ -395,7 +411,91 @@ class CiscoConfig:
                 self._parsed_config.commit()
 
     def _find_tacacs_server_lines(self) -> list[BaseCfgLine]:
-        return self._parsed_config.find_objects(r"^tacacs-server host")
+        return self._parsed_config.find_objects(
+            r"^tacacs(-server host| server) "
+        )
+
+    def _find_tacacs_group_lines(self) -> list[BaseCfgLine]:
+        return self._parsed_config.find_objects(r"^aaa group server tacacs\+")
+
+    @property
+    def tacacs_group(self) -> list[TacacsServerGroupConfig]:
+        found = []
+        group_lines = self._find_tacacs_group_lines()
+        for line in group_lines:
+            name = line.text.split()[-1]
+            vrf = None
+            source_interface = None
+            server_private_list = []
+            for child in line.children:
+                if child.text.strip().startswith("server-private"):
+                    parts = child.text.strip().split()
+                    ip_address = IPv4Address(parts[1])
+                    key_mode = None
+                    key = None
+                    if len(parts) > 2:
+                        if parts[2] == "key":
+                            if len(parts) > 3:
+                                if parts[3].isdigit():
+                                    key_mode = int(parts[3])
+                                    if len(parts) > 4:
+                                        key = parts[4]
+                                else:
+                                    key = parts[3]
+                        elif parts[2].isdigit():
+                            key_mode = int(parts[2])
+                            if len(parts) > 3:
+                                key = parts[3]
+                        else:
+                            key = parts[2]
+                    server_private_list.append(
+                        TacacsServerPrivateConfig(
+                            ip_address=ip_address,
+                            key_mode=key_mode,
+                            key=key,
+                        )
+                    )
+                elif child.text.strip().startswith("ip vrf forwarding"):
+                    vrf = child.text.strip().split()[-1]
+                elif child.text.strip().startswith(
+                    "ip tacacs source-interface"
+                ):
+                    source_interface = self._parse_interface_from_string(
+                        child.text.strip().split()[-1]
+                    )
+            found.append(
+                TacacsServerGroupConfig(
+                    name=name,
+                    vrf=vrf,
+                    source_interface=source_interface,
+                    server_private_list=server_private_list,
+                )
+            )
+        return found
+
+    @tacacs_group.setter
+    def tacacs_group(self, new_groups: list[TacacsServerGroupConfig]) -> None:
+        current_groups = self._find_tacacs_group_lines()
+        current_group_count = len(current_groups)
+        new_group_count = len(new_groups)
+        if current_group_count == 0 and new_group_count == 0:
+            return
+
+        if current_group_count > 0:
+            for current_group in current_groups[::-1]:
+                current_group.delete()
+                self._parsed_config.commit()
+
+        if new_group_count > 0:
+            if current_group_count == 0:
+                add_before_line = self.last_config_line
+            else:
+                add_before_line = current_groups[-1]
+
+            for new_group in new_groups[::-1]:
+                for line in new_group.to_config_lines()[::-1]:
+                    self._parsed_config.objs.insert(add_before_line.index, line)
+                    self._parsed_config.commit()
 
     @property
     def tacacs_servers(self) -> list[TacacsServerConfig]:
@@ -403,12 +503,20 @@ class CiscoConfig:
         server_lines = self._find_tacacs_server_lines()
         for line in server_lines:
             parts = line.text.strip().split()
-            ip_address = IPv4Address(parts[2])
-            if len(parts) > 3:
-                if parts[3] == "key":
-                    encrpyted_string = parts[4]
-            else:
+            if parts[1] == "host":
+                ip_address = IPv4Address(parts[2])
                 encrpyted_string = None
+                if len(parts) > 3:
+                    if parts[3] == "key":
+                        encrpyted_string = parts[4]
+            else:
+                ip_address = IPv4Address(parts[2])
+                encrpyted_string = None
+                key_line = line.re_search_children(r"^ key")
+                if key_line:
+                    key_parts = key_line[0].text.strip().split()
+                    if len(key_parts) > 2:
+                        encrpyted_string = key_parts[2]
 
             found.append(
                 TacacsServerConfig(
