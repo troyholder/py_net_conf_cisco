@@ -505,13 +505,13 @@ class CiscoConfig:
             parts = line.text.strip().split()
             if parts[1] == "host":
                 ip_address = IPv4Address(parts[2])
-                encrpyted_string = None
+                encrpyted_string = ""
                 if len(parts) > 3:
                     if parts[3] == "key":
                         encrpyted_string = parts[4]
             else:
                 ip_address = IPv4Address(parts[2])
-                encrpyted_string = None
+                encrpyted_string = ""
                 key_line = line.re_search_children(r"^ key")
                 if key_line:
                     key_parts = key_line[0].text.strip().split()
