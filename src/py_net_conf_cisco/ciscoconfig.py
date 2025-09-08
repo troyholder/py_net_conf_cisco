@@ -600,3 +600,6 @@ class CiscoConfig:
             for current_vrf in current_vrfs[::-1]:
                 current_vrf.delete()
                 self._parsed_config.commit()
+
+    def has_vrf(self, vrf_name: str) -> bool:
+        return any(vrf.name == vrf_name for vrf in self.vrfs)

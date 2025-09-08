@@ -79,3 +79,9 @@ class TestCiscoConfig:
         config = request.getfixturevalue(config)
         config.vrfs = vrf_configs
         assert config.vrfs == vrf_configs
+
+    def test_failing_has_vrf(self, empty_config):
+        assert not empty_config.has_vrf("Red")
+
+    def test_working_has_vrf(self, config_from_file):
+        assert config_from_file.has_vrf("Blue")
