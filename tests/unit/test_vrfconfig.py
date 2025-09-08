@@ -96,29 +96,20 @@ class TestVRFConfig:
     ]
 
     @pytest.mark.parametrize("kwargs, config_lines", working_cases)
-    def test_vrf_config_working_cases(self, kwargs, config_lines):
+    def test_working_creations(self, kwargs, config_lines):
         """Test VRFConfig instantiation"""
         vrf = VRFConfig(**kwargs)  # ty: ignore[missing-argument]
 
         assert vrf.to_config_lines() == config_lines
 
-    failing_from_config_lines_cases = [
-        (
-            [
-                "vrf definition Blue",
-                " rd 65500:0",
-                " !",
-                " address-family ipv4",
-                "  route-target export 65500:0",
-                "  route-target import 65500:0",
-                " exit-address-family",
-                "vrf definition Red",
-                " rd 65500:0",
-                " !",
-                " address-family ipv4",
-                "  route-target export 65500:0",
-                "  route-target import 65500:0",
-                " exit-address-family",
-            ],
-        )
-    ]
+    @pytest.mark.parametrize("kwargs, config_lines", working_cases)
+    def test_working_creations_to_config_lines(self, kwargs, config_lines):
+        """Test VRFConfig instantiation"""
+        vrf = VRFConfig(**kwargs)  # ty: ignore[missing-argument]
+
+        assert vrf.to_config_lines() == config_lines
+
+    @pytest.mark.parametrize("kwargs, config_lines", working_cases)
+    def test_working_creations_from_config_lines(self, kwargs, config_lines):
+        """Test VRFConfig instantiation"""
+        assert VRFConfig.from_config_lines(config_lines) == VRFConfig(**kwargs)
