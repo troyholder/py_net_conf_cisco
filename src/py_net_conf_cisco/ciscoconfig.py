@@ -34,6 +34,10 @@ class CiscoConfig:
         else:
             self._parsed_config = CiscoConfParse(str(config_path))
 
+    def get_text(self) -> List[str]:
+        """Return the configuration as a string."""
+        return self._parsed_config.get_text()
+
     def _last_line(self) -> BaseCfgLine:
         end_lines = self._parsed_config.find_objects(r"^end$")
         if end_lines:
