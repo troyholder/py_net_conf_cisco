@@ -32,3 +32,13 @@ class TestCiscoConfig:
         assert (
             config._last_line() == config._parsed_config.config_objs[expected]
         )
+
+    get_text_tests = [
+        ("empty_config", ["!"]),
+        ("config_from_file", sample1.config.split("\n")),
+    ]
+
+    @pytest.mark.parametrize("config, expected", get_text_tests)
+    def test_get_text(self, config, expected, request):
+        config = request.getfixturevalue(config)
+        assert config.get_text() == expected
