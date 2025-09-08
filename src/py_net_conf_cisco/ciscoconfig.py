@@ -12,7 +12,10 @@ from .tacacsgroupconfig import (
     TacacsServerGroupConfig,
     TacacsServerPrivateConfig,
 )
-from .tacacsserverconfig import TacacsServerConfig
+from .tacacsserverconfig import (
+    TacacsServerConfig,
+    tacas_server_from_config_lines,
+)
 from .vrfconfig import VRFConfig, vrf_from_config_lines
 
 
@@ -507,27 +510,8 @@ class CiscoConfig:
         found = []
         server_lines = self._find_tacacs_server_lines()
         for line in server_lines:
-            parts = line.text.strip().split()
-            if parts[1] == "host":
-                ip_address = IPv4Address(parts[2])
-                encrpyted_string = ""
-                if len(parts) > 3:
-                    if parts[3] == "key":
-                        encrpyted_string = parts[4]
-            else:
-                ip_address = IPv4Address(parts[2])
-                encrpyted_string = ""
-                key_line = line.re_search_children(r"^ key")
-                if key_line:
-                    key_parts = key_line[0].text.strip().split()
-                    if len(key_parts) > 2:
-                        encrpyted_string = key_parts[2]
-
             found.append(
-                TacacsServerConfig(
-                    ip_address=ip_address,
-                    encrpyted_string=encrpyted_string,
-                )
+                tacas_server_from_config_lines([line.text] + line.children)
             )
         return found
 
