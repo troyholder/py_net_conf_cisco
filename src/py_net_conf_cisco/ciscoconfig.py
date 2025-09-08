@@ -13,6 +13,7 @@ from .tacacsgroupconfig import (
     TacacsServerPrivateConfig,
 )
 from .tacacsserverconfig import TacacsServerConfig
+from .vrfconfig import VRFConfig, vrf_from_config_lines
 
 
 class CiscoConfig:
@@ -556,4 +557,46 @@ class CiscoConfig:
                     current_server.text
                 )
                 current_server_line[0].delete()
+                self._parsed_config.commit()
+
+    def _find_vrf_lines(self) -> list[BaseCfgLine]:
+        return self._parsed_config.find_objects(r"^vrf definition ")
+
+    @property
+    def vrfs(self) -> list[VRFConfig]:
+        found = []
+        vrf_lines = self._find_vrf_lines()
+        for line in vrf_lines:
+            print(line.text)
+            found.append(vrf_from_config_lines([line.text] + line.children))
+        return found
+
+    @vrfs.setter
+    def vrfs(self, new_vrfs: list[VRFConfig]) -> None:
+        current_vrfs = self._find_vrf_lines()
+        current_vrf_count = len(current_vrfs)
+        new_vrf_count = len(new_vrfs)
+        if current_vrf_count == 0 and new_vrf_count == 0:
+            return
+
+        if current_vrf_count == 0:
+            add_before_line = self.last_config_line
+        else:
+            last_current_vrf_line = current_vrfs[-1]
+            # Find the last child of the last VRF or the VRF line itself
+            if last_current_vrf_line.children:
+                last_vrf_child = last_current_vrf_line.children[-1]
+                index = self._parsed_config.objs.index(last_vrf_child)
+            else:
+                index = self._parsed_config.objs.index(last_current_vrf_line)
+            add_before_line = self._parsed_config.objs[index + 1]
+
+        for new_vrf in new_vrfs[::-1]:
+            for line in new_vrf.to_config_lines()[::-1]:
+                self._parsed_config.objs.insert(add_before_line.index, line)
+                self._parsed_config.commit()
+
+        if current_vrf_count > 0:
+            for current_vrf in current_vrfs[::-1]:
+                current_vrf.delete()
                 self._parsed_config.commit()

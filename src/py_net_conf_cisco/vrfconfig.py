@@ -43,3 +43,62 @@ class VRFConfig:
             lines.append(" exit-address-family")
 
         return lines
+
+
+def vrf_from_config_lines(lines: List[str]) -> Optional[VRFConfig]:
+    """
+    Parse VRF configuration lines and return a VRFConfig object.
+
+    Args:
+        lines: List of configuration lines
+
+    Returns:
+        VRFConfig object if parsing successful, None otherwise
+    """
+    if not lines:
+        return None
+
+    # Find the VRF definition line
+    vrf_line = None
+    for line in lines:
+        if line.strip().startswith("vrf definition "):
+            vrf_line = line
+            break
+
+    if not vrf_line:
+        return None
+
+    # Extract VRF name
+    name = vrf_line.strip().split()[-1]
+    rd = None
+    address_family_ipv4_exports = []
+    address_family_ipv4_imports = []
+
+    # Parse the configuration lines
+    in_address_family = False
+    for line in lines:
+        stripped_line = line.strip()
+
+        if stripped_line.startswith("rd "):
+            rd = stripped_line.split("rd ", 1)[1]
+        elif stripped_line == "address-family ipv4":
+            in_address_family = True
+        elif stripped_line == "exit-address-family":
+            in_address_family = False
+        elif in_address_family and stripped_line.startswith(
+            "route-target export "
+        ):
+            target = stripped_line.split()[-1]
+            address_family_ipv4_exports.append(target)
+        elif in_address_family and stripped_line.startswith(
+            "route-target import "
+        ):
+            target = stripped_line.split()[-1]
+            address_family_ipv4_imports.append(target)
+
+    return VRFConfig(
+        name=name,
+        rd=rd,
+        address_family_ipv4_exports=address_family_ipv4_exports,
+        address_family_ipv4_imports=address_family_ipv4_imports,
+    )
