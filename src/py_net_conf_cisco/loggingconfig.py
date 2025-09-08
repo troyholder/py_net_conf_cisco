@@ -57,7 +57,7 @@ class LoggingConfig:
         return [config]
 
 
-def loggingconfig_from_lines(config_lines: List[str]) -> LoggingConfig:
+def loggingconfig_from_config_lines(config_lines: List[str]) -> LoggingConfig:
     syslog_ip_address = None
     syslog_fqdn = ""
     vrf = ""

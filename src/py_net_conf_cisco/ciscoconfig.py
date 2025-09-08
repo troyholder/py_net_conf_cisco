@@ -6,7 +6,7 @@ from typing import List, Optional, Union
 from ciscoconfparse2 import BaseCfgLine, CiscoConfParse
 
 from .interfaceconfig import Interface, InterfaceConfig, InterfaceType
-from .loggingconfig import LoggingConfig, loggingconfig_from_lines
+from .loggingconfig import LoggingConfig, loggingconfig_from_config_lines
 from .radiusserverconfig import RadiusServerConfig
 from .tacacsgroupconfig import (
     TacacsServerGroupConfig,
@@ -387,7 +387,7 @@ class CiscoConfig:
                     continue
                 elif index == 3:
                     continue
-            found.append(loggingconfig_from_lines([line.text]))
+            found.append(loggingconfig_from_config_lines([line.text]))
 
         return found
 

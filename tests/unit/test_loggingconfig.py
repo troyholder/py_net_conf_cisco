@@ -5,7 +5,7 @@ import pytest
 
 from py_net_conf_cisco.loggingconfig import (
     LoggingConfig,
-    loggingconfig_from_lines,
+    loggingconfig_from_config_lines,
 )
 
 server_1_ipv4_address = IPv4Address("192.168.1.1")
@@ -154,11 +154,11 @@ class TestLoggingConfig:
     ):
         """Test failing text to LoggingConfig"""
         with pytest.raises(exception_class, match=warning):
-            logging_server = loggingconfig_from_lines(lines)  # pyright: ignore
+            logging_server = loggingconfig_from_config_lines(lines)  # pyright: ignore
             return logging_server
 
     @pytest.mark.parametrize("kwargs, expected_lines", working_cases)
     def test_working_loggingconfig_from_lines(self, kwargs, expected_lines):
-        assert loggingconfig_from_lines(expected_lines) == LoggingConfig(
+        assert loggingconfig_from_config_lines(expected_lines) == LoggingConfig(
             **kwargs
         )
